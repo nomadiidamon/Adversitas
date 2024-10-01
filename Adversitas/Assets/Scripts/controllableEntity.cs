@@ -3,23 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
+
+public class controllableEntity: MonoBehaviour, IMove, ILook
 {
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
-    [SerializeField] Animator animator;
-
-    [Header("-----Colliders-----")]
-    [SerializeField] CapsuleCollider head;
-    [SerializeField] CapsuleCollider chest;
-    [SerializeField] CapsuleCollider leftArm;
-    [SerializeField] CapsuleCollider rightArm;
-    [SerializeField] CapsuleCollider leftThigh;
-    [SerializeField] CapsuleCollider rightThigh;
-    [SerializeField] CapsuleCollider leftLeg;
-    [SerializeField] CapsuleCollider rightLeg;
-    [SerializeField] BoxCollider leftFoot;
-    [SerializeField] BoxCollider rightFoot;
+    [SerializeField] Rigidbody rb;
 
     [Header("-----Camera-----")]
     [SerializeField] Camera playerCamera;
@@ -32,20 +21,13 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
 
     [Header("-----Attributes-----")]
     [Range(0, 20)][SerializeField] float speed;
-    [Range(0, 5)][SerializeField] float sprintMod;
-    [Range(0, 5)][SerializeField] int jumpMax;
-    [Range(0, 100)][SerializeField] float jumpSpeed;
-    [Range(0, 100)][SerializeField] float gravity;
 
 
-    private CapsuleCollider[] myColliders;
     private Vector2 moveInput;
     private Vector2 lookInput;
-    private Vector3 verticleVelocity;
-    private float currentYaw;
-    private float currentPitch;
-    private float jumpValue;
-    int jumpCount;
+    private float currentYaw; // Keep track of the current yaw for orbiting
+    private float currentPitch; // Keep track of the current pitch for up/down rotation
+
 
 
     void Awake()
@@ -54,16 +36,6 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
         playerInput.actions["Move"].canceled += ctx => moveInput = Vector2.zero;
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
-        //playerInput.actions["Jump"].performed += ctx => jumpValue = ctx.ReadValue<float>();
-        animator.enabled = true;
-        animator.stabilizeFeet = true;
-        myColliders = new CapsuleCollider[8]
-        {head, chest, leftArm, rightArm, leftThigh, rightThigh, leftLeg, rightLeg};
-
-        foreach (var collider in myColliders) { 
-            collider.enabled = true;
-            collider.isTrigger = true;
-        }
     }
 
     void Update()
@@ -71,33 +43,30 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
         Look();
     }
 
-    void FixedUpdate()
+    public void FixedUpdate()
     {
         Move();
-
     }
 
     public void Move()
     {
+        // Calculate movement direction based on the camera's orientation
+        Vector3 cameraForward = playerCamera.transform.forward; // Get the camera's forward direction
+        cameraForward.y = 0; // Ignore vertical movement
+        cameraForward.Normalize(); // Normalize the vector to ensure consistent movement speed
 
-        Vector3 cameraForward = playerCamera.transform.forward;
-        cameraForward.y = 0;
-        cameraForward.Normalize();
-
-        Vector3 right = playerCamera.transform.right;
-        right.y = 0;
-        right.Normalize();
+        Vector3 right = playerCamera.transform.right; // Get the camera's right direction
+        right.y = 0; // Ignore vertical movement
+        right.Normalize(); // Normalize the vector
 
         // Combine movement input with camera's forward and right vectors
         Vector3 movement = (cameraForward * moveInput.y + right * moveInput.x).normalized;
 
-        float currentSpeed = speed;
-        transform.position += movement * currentSpeed * Time.deltaTime;
+        float currentSpeed = speed; // You can modify this for sprinting if needed
+                                    // Move the player
+        rb.position += movement * currentSpeed * Time.deltaTime;
 
-        animator.SetFloat("VelocityX", moveInput.x);
-        animator.SetFloat("VelocityY", moveInput.y); 
-
-        if (transform.rotation != playerCamera.transform.rotation)
+        if (this.transform.rotation != playerCamera.transform.rotation)
         {
             Quaternion targetRotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * playerTurnToCameraSpeed);
@@ -106,19 +75,20 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
 
     public void Look()
     {
+        // Update the current yaw based on look input
         currentYaw += lookInput.x * cameraLookSpeed;
-        currentPitch -= lookInput.y * cameraLookSpeed;
+        currentPitch -= lookInput.y * cameraLookSpeed; // Invert pitch for up/down
 
+        // Clamp the pitch to prevent flipping
         currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
 
+        // Calculate the new camera position
         Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
         Vector3 offset = rotation * new Vector3(0, 0, -distanceFromPlayer) + new Vector3(0, height, 0);
         playerCamera.transform.position = transform.position + offset;
 
-        playerCamera.transform.LookAt(transform.position + Vector3.up * height);
+        // Make the camera look at the player
+        playerCamera.transform.LookAt(transform.position + Vector3.up * height); // Adjusted to look at player's height
     }
-
-
-
 
 }
