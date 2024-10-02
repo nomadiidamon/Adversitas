@@ -1,23 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
+public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
 {
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] Animator animator;
 
     [Header("-----Colliders-----")]
-    [SerializeField] CapsuleCollider head;
-    [SerializeField] CapsuleCollider chest;
-    [SerializeField] CapsuleCollider leftArm;
-    [SerializeField] CapsuleCollider rightArm;
-    [SerializeField] CapsuleCollider leftThigh;
-    [SerializeField] CapsuleCollider rightThigh;
-    [SerializeField] CapsuleCollider leftLeg;
-    [SerializeField] CapsuleCollider rightLeg;
+    [SerializeField] CapsuleCollider mainCollider;
+    [SerializeField] CapsuleCollider damageCollider;
     [SerializeField] BoxCollider leftFoot;
     [SerializeField] BoxCollider rightFoot;
 
@@ -34,10 +29,11 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
     [Range(0, 20)][SerializeField] float speed;
     [Range(0, 5)][SerializeField] float sprintMod;
     [Range(0, 5)][SerializeField] int jumpMax;
-    [Range(0, 100)][SerializeField] float jumpSpeed;
-    [Range(0, 100)][SerializeField] float gravity;
+    [Range(0, 20)][SerializeField] float jumpSpeed;
+    [Range(0, 30)][SerializeField] float gravity;
 
-
+    public bool onSolidSurface = false;
+    public bool isJumping = false;
     private CapsuleCollider[] myColliders;
     private Vector2 moveInput;
     private Vector2 lookInput;
@@ -54,32 +50,25 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
         playerInput.actions["Move"].canceled += ctx => moveInput = Vector2.zero;
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
-        //playerInput.actions["Jump"].performed += ctx => jumpValue = ctx.ReadValue<float>();
+        playerInput.actions["Jump"].performed += ctx => jumpValue = ctx.ReadValue<float>();
         animator.enabled = true;
         animator.stabilizeFeet = true;
-        myColliders = new CapsuleCollider[8]
-        {head, chest, leftArm, rightArm, leftThigh, rightThigh, leftLeg, rightLeg};
-
-        foreach (var collider in myColliders) { 
-            collider.enabled = true;
-            collider.isTrigger = true;
-        }
     }
 
     void Update()
     {
         Look();
+        Jump();
     }
 
     void FixedUpdate()
     {
         Move();
-
+        ApplyGravity();
     }
 
     public void Move()
     {
-
         Vector3 cameraForward = playerCamera.transform.forward;
         cameraForward.y = 0;
         cameraForward.Normalize();
@@ -102,6 +91,7 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
             Quaternion targetRotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * playerTurnToCameraSpeed);
         }
+        Physics.SyncTransforms();
     }
 
     public void Look()
@@ -116,9 +106,71 @@ public class playerController : MonoBehaviour, IMove, ILook//,IJump, IGravity
         playerCamera.transform.position = transform.position + offset;
 
         playerCamera.transform.LookAt(transform.position + Vector3.up * height);
+        Physics.SyncTransforms();
     }
 
+    public bool isGrounded()
+    {
+        if (rightFoot.GetComponent<FootRaycast>().isGrounded && leftFoot.GetComponent<FootRaycast>().isGrounded)
+        {
+            onSolidSurface = true;
+            isJumping = false;
+            return true;
+        }
+        else
+        {
+            onSolidSurface = false;            
+            return false;
+        }
+    }
 
+    public void Jump()
+    {
+        if (jumpValue == 1 )
+        {
+            if (isGrounded())
+            {
+                isJumping = true;
+                animator.SetTrigger("IsJumping");
+                jumpValue = 0;
+            }
+            else 
+            { 
+                return; 
+            }
+            Physics.SyncTransforms();
+        }
+    }
+
+    public void ApplyJumpForce()
+    {
+        verticleVelocity.y = jumpSpeed;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
+    }
+
+    public void StartFalling()
+    {
+        verticleVelocity.y = 0;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.useGravity = true;
+    }
+
+    public void ApplyGravity()
+    {
+        if (!isGrounded() || isJumping)
+        {
+            verticleVelocity.y -= gravity * Time.deltaTime;
+            transform.position += verticleVelocity * Time.deltaTime;
+            Physics.SyncTransforms();
+        }
+
+        if (isGrounded() && verticleVelocity.y < 0)
+        {
+            verticleVelocity.y = 0;
+            isJumping = false;
+        }
+    }
 
 
 }

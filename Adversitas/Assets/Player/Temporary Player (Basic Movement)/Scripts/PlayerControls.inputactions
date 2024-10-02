@@ -29,7 +29,7 @@
                     "id": "4bc9431f-d3c3-48e1-91fa-c3d2a12349b3",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 },
                 {
@@ -188,7 +188,7 @@
                     "name": "",
                     "id": "bb6ef3e6-afa2-454e-b405-95956d0eb6fe",
                     "path": "<Gamepad>/buttonSouth",
-                    "interactions": "Press(behavior=2)",
+                    "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Jump",
@@ -199,7 +199,7 @@
                     "name": "",
                     "id": "5a11e62b-3a7f-4c7f-8762-27398f3a96c8",
                     "path": "<Keyboard>/space",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Jump",
