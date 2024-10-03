@@ -29,7 +29,7 @@
                     "id": "4bc9431f-d3c3-48e1-91fa-c3d2a12349b3",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press",
+                    "interactions": "Tap",
                     "initialStateCheck": false
                 },
                 {
@@ -38,7 +38,7 @@
                     "id": "944fc1b9-95a2-40fd-ab9f-8d44180e49fe",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 },
                 {
@@ -209,10 +209,21 @@
                 {
                     "name": "",
                     "id": "27075dd1-7d37-49e6-8ac4-f3e45d078204",
-                    "path": "<Gamepad>/buttonEast",
+                    "path": "<Gamepad>/leftStickPress",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
+                    "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3591155b-416f-48f7-82a2-7ca0c9b455c3",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
                     "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false

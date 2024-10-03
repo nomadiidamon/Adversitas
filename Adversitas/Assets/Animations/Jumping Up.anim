@@ -23137,7 +23137,7 @@ AnimationClip:
     m_LoopBlend: 0
     m_LoopBlendOrientation: 1
     m_LoopBlendPositionY: 1
-    m_LoopBlendPositionXZ: 0
+    m_LoopBlendPositionXZ: 1
     m_KeepOriginalOrientation: 0
     m_KeepOriginalPositionY: 1
     m_KeepOriginalPositionXZ: 0
@@ -45075,7 +45075,7 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
-  - time: 0.36666667
+  - time: 0.33333334
     functionName: ApplyJumpForce
     data: 
     objectReferenceParameter: {fileID: 0}

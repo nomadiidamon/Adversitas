@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
-public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
+public class playerController : MonoBehaviour, IMove, ILook, IJump
 {
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
@@ -30,17 +31,16 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
     [Range(0, 5)][SerializeField] float sprintMod;
     [Range(0, 5)][SerializeField] int jumpMax;
     [Range(0, 20)][SerializeField] float jumpSpeed;
+    [Range(0, 20)][SerializeField] float doubleJumpSpeed;
     [Range(0, 30)][SerializeField] float gravity;
 
     public bool onSolidSurface = false;
     public bool isJumping = false;
-    private CapsuleCollider[] myColliders;
     private Vector2 moveInput;
     private Vector2 lookInput;
     private Vector3 verticleVelocity;
     private float currentYaw;
     private float currentPitch;
-    private float jumpValue;
     int jumpCount;
 
 
@@ -50,7 +50,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
         playerInput.actions["Move"].canceled += ctx => moveInput = Vector2.zero;
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
-        playerInput.actions["Jump"].performed += ctx => jumpValue = ctx.ReadValue<float>();
+        playerInput.actions["Jump"].performed += ctx => OnJumpInput(ctx);
+
+
         animator.enabled = true;
         animator.stabilizeFeet = true;
     }
@@ -58,13 +60,12 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
     void Update()
     {
         Look();
-        Jump();
     }
 
     void FixedUpdate()
     {
         Move();
-        ApplyGravity();
+        isGrounded();
     }
 
     public void Move()
@@ -111,66 +112,78 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump, IGravity
 
     public bool isGrounded()
     {
+
         if (rightFoot.GetComponent<FootRaycast>().isGrounded && leftFoot.GetComponent<FootRaycast>().isGrounded)
         {
             onSolidSurface = true;
             isJumping = false;
+            jumpCount = 0;
+
+            AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+            if (info.IsName("Falling Idle"))
+            {
+                animator.SetBool("IsGrounded", true);
+            }
             return true;
         }
         else
         {
-            onSolidSurface = false;            
+            onSolidSurface = false;
+            animator.SetBool("IsGrounded", false);
             return false;
+        }
+    }
+
+    public void OnJumpInput(InputAction.CallbackContext context)
+    {
+        if (context.interaction is TapInteraction)
+        {
+            Jump();
         }
     }
 
     public void Jump()
     {
-        if (jumpValue == 1 )
+        if (isGrounded())
         {
-            if (isGrounded())
+            if(moveInput.x == 0 && moveInput.y == 0)
             {
                 isJumping = true;
-                animator.SetTrigger("IsJumping");
-                jumpValue = 0;
+                animator.SetTrigger("SingleJump");
+                jumpCount++;
             }
-            else 
-            { 
-                return; 
-            }
-            Physics.SyncTransforms();
         }
+        else 
+        {
+            if (!isGrounded() && jumpCount < jumpMax)
+            {
+                isJumping = true;
+                animator.SetTrigger("SingleToDouble");
+                jumpCount++;
+            }
+        }
+        Physics.SyncTransforms();
     }
 
     public void ApplyJumpForce()
     {
         verticleVelocity.y = jumpSpeed;
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.useGravity = false;
+        rb.velocity = verticleVelocity;
+    }
+
+    public void ApplySecondaryJumpForce()
+    {
+        verticleVelocity.y = doubleJumpSpeed;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.velocity = verticleVelocity;
     }
 
     public void StartFalling()
     {
         verticleVelocity.y = 0;
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.useGravity = true;
+        rb.velocity = verticleVelocity;
     }
-
-    public void ApplyGravity()
-    {
-        if (!isGrounded() || isJumping)
-        {
-            verticleVelocity.y -= gravity * Time.deltaTime;
-            transform.position += verticleVelocity * Time.deltaTime;
-            Physics.SyncTransforms();
-        }
-
-        if (isGrounded() && verticleVelocity.y < 0)
-        {
-            verticleVelocity.y = 0;
-            isJumping = false;
-        }
-    }
-
 
 }
