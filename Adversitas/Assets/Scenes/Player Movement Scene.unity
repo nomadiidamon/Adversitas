@@ -6230,9 +6230,13 @@ MonoBehaviour:
   jumpSpeed: 5.65
   doubleJumpSpeed: 6.25
   runningJumpSpeed: 5.86
+  dodgeMax: 1
+  dodgeSpeed: 30.9
+  dodgeDuration: 2.66
   onSolidSurface: 0
   isJumping: 0
   isSprinting: 0
+  isDodging: 0
 --- !u!54 &9069808870241420320
 Rigidbody:
   m_ObjectHideFlags: 0

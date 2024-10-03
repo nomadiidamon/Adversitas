@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
@@ -33,16 +34,24 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     [Range(0, 20)][SerializeField] float jumpSpeed;
     [Range(0, 20)][SerializeField] float doubleJumpSpeed;
     [Range(0, 20)][SerializeField] float runningJumpSpeed;
+    [Range(0, 5)][SerializeField] int dodgeMax;
+    [Range(0, 100)][SerializeField] float dodgeSpeed;
+    [Range(0, 20)][SerializeField] float dodgeDuration;
+    private Stopwatch stopwatch;
+
 
     public bool onSolidSurface = false;
     public bool isJumping = false;
     public bool isSprinting = false;
+    public bool isDodging = false;
     private Vector2 moveInput;
     private Vector2 lookInput;
     private Vector3 verticleVelocity;
     private float currentYaw;
     private float currentPitch;
     int jumpCount;
+    int dodgeCount;
+
 
 
     void Awake()
@@ -52,8 +61,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
         playerInput.actions["Jump"].performed += ctx => OnJumpInput(ctx);
-        playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };   // Start sprinting
-
+        playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };   
+        playerInput.actions["Dodge"].performed += ctx => OnDodgeInput(ctx);  
+        stopwatch = new Stopwatch();
         animator.enabled = true;
         animator.stabilizeFeet = true;
     }
@@ -67,6 +77,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     {
         Move();
         isGrounded();
+        CheckDodgeTimer();
     }
 
     public void Move()
@@ -231,4 +242,71 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         rb.velocity = verticleVelocity;
     }
 
+
+    public void OnDodgeInput(InputAction.CallbackContext context)
+    {
+        if (context.interaction is TapInteraction)
+        {
+            Dodge();
+        }
+    }
+
+    public void Dodge()
+    {
+        if (isDodging)
+        {
+            return;
+        }
+        else
+        {
+            if (isGrounded())
+            {
+                stopwatch.Reset();
+                animator.SetFloat("DodgeTime", dodgeDuration);
+                stopwatch.Start();
+                isDodging = true;
+                animator.SetTrigger("IsDodging");
+                dodgeCount++;
+            }
+            else
+            {
+                if (dodgeCount < dodgeMax)
+                {
+                    stopwatch.Reset();
+                    animator.SetFloat("DodgeTime", dodgeDuration);
+                    stopwatch.Start();
+                    isDodging = true;
+                    animator.SetTrigger("IsDodging");
+                    dodgeCount++;
+                }
+            }
+            
+        }
+    }
+
+    public void CheckDodgeTimer()
+    {
+        if ((float)(stopwatch.ElapsedMilliseconds) > dodgeDuration)
+        {
+            animator.SetFloat("DodgeTime", 0);
+            stopwatch.Stop();
+        }
+    }
+
+    public void ApplyDodgeForce()
+    {
+        moveInput *=  (speed * dodgeSpeed);
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.AddForce(new Vector3(moveInput.x, 0, moveInput.y), ForceMode.Impulse);
+    }
+
+
+    public void RemoveDodgeForce()
+    {
+        moveInput /= (speed * dodgeSpeed);
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.AddForce(- 1 * new Vector3(moveInput.x, 0, moveInput.y), ForceMode.Impulse);
+        isDodging = false;
+        dodgeCount = 0;
+    }
 }
