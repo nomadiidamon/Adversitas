@@ -32,10 +32,11 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     [Range(0, 5)][SerializeField] int jumpMax;
     [Range(0, 20)][SerializeField] float jumpSpeed;
     [Range(0, 20)][SerializeField] float doubleJumpSpeed;
-    [Range(0, 30)][SerializeField] float gravity;
+    [Range(0, 20)][SerializeField] float runningJumpSpeed;
 
     public bool onSolidSurface = false;
     public bool isJumping = false;
+    public bool isSprinting = false;
     private Vector2 moveInput;
     private Vector2 lookInput;
     private Vector3 verticleVelocity;
@@ -51,7 +52,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
         playerInput.actions["Jump"].performed += ctx => OnJumpInput(ctx);
-
+        playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };   // Start sprinting
 
         animator.enabled = true;
         animator.stabilizeFeet = true;
@@ -82,6 +83,25 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         Vector3 movement = (cameraForward * moveInput.y + right * moveInput.x).normalized;
 
         float currentSpeed = speed;
+
+        if (isSprinting)
+        {
+            currentSpeed *= sprintMod;
+            animator.SetTrigger("IsSprinting");
+
+            if (moveInput.y == 0 && moveInput.x == 0)
+            {
+                isSprinting = false;
+                animator.SetTrigger("IsWalking");
+            }
+
+        }
+        else
+        {
+            currentSpeed /= sprintMod;
+            animator.SetTrigger("IsWalking");
+        }
+
         transform.position += movement * currentSpeed * Time.deltaTime;
 
         animator.SetFloat("VelocityX", moveInput.x);
@@ -119,6 +139,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             isJumping = false;
             jumpCount = 0;
 
+            animator.ResetTrigger("SingleToDouble");
+            animator.ResetTrigger("SingleJump");
+
             AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
             if (info.IsName("Falling Idle"))
             {
@@ -146,12 +169,20 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     {
         if (isGrounded())
         {
-            if(moveInput.x == 0 && moveInput.y == 0)
+
+            if (moveInput.x == 0 && moveInput.y == 0)
             {
                 isJumping = true;
                 animator.SetTrigger("SingleJump");
                 jumpCount++;
             }
+            else
+            {
+                isJumping = true;
+                animator.SetTrigger("MovingJump");
+                jumpCount++;
+            }
+
         }
         else 
         {
@@ -172,9 +203,23 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         rb.velocity = verticleVelocity;
     }
 
+    public void ApplyHopForce()
+    {
+        verticleVelocity.y = jumpSpeed / 2;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.velocity = verticleVelocity;
+    }
+
     public void ApplySecondaryJumpForce()
     {
         verticleVelocity.y = doubleJumpSpeed;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.velocity = verticleVelocity;
+    }
+
+    public void ApplyRunningJumpForce()
+    {
+        verticleVelocity.y = runningJumpSpeed;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }

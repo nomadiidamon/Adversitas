@@ -2305,7 +2305,7 @@ BoxCollider:
   m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 10, y: 0, z: 10}
+  m_Size: {x: 10, y: 0.5, z: 10}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1326617131
 GameObject:
@@ -6228,10 +6228,11 @@ MonoBehaviour:
   sprintMod: 1.28
   jumpMax: 2
   jumpSpeed: 5.65
-  doubleJumpSpeed: 7.52
-  gravity: 13.7
+  doubleJumpSpeed: 6.25
+  runningJumpSpeed: 5.86
   onSolidSurface: 0
   isJumping: 0
+  isSprinting: 0
 --- !u!54 &9069808870241420320
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -6240,7 +6241,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6496175284057421350}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 25
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
