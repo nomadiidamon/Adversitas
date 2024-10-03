@@ -37,9 +37,14 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     [Range(0, 5)][SerializeField] int dodgeMax;
     [Range(0, 100)][SerializeField] float dodgeSpeed;
     [Range(0, 20)][SerializeField] float dodgeDuration;
-    private Stopwatch stopwatch;
+    [Range(0, 5)][SerializeField] float hardFallTime;
+
+    private Stopwatch dodgeStopwatch;
+    private Stopwatch fallStopwatch;
 
 
+    private FootRaycast leftFootRaycast;
+    private FootRaycast rightFootRaycast;
     public bool onSolidSurface = false;
     public bool isJumping = false;
     public bool isSprinting = false;
@@ -63,7 +68,10 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         playerInput.actions["Jump"].performed += ctx => OnJumpInput(ctx);
         playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };   
         playerInput.actions["Dodge"].performed += ctx => OnDodgeInput(ctx);  
-        stopwatch = new Stopwatch();
+        dodgeStopwatch = new Stopwatch();
+        fallStopwatch = new Stopwatch();
+        leftFootRaycast = leftFoot.GetComponent<FootRaycast>();
+        rightFootRaycast = rightFoot.GetComponent<FootRaycast>();
         animator.enabled = true;
         animator.stabilizeFeet = true;
     }
@@ -78,6 +86,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         Move();
         isGrounded();
         CheckDodgeTimer();
+        CheckFallTimer();
     }
 
     public void Move()
@@ -144,7 +153,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     public bool isGrounded()
     {
 
-        if (rightFoot.GetComponent<FootRaycast>().isGrounded && leftFoot.GetComponent<FootRaycast>().isGrounded)
+        if (rightFootRaycast.isGrounded && leftFootRaycast.isGrounded)
         {
             onSolidSurface = true;
             isJumping = false;
@@ -162,6 +171,8 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         }
         else
         {
+            fallStopwatch.Reset();
+            fallStopwatch.Start();
             onSolidSurface = false;
             animator.SetBool("IsGrounded", false);
             return false;
@@ -199,8 +210,10 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         {
             if (!isGrounded() && jumpCount < jumpMax)
             {
+
                 isJumping = true;
                 animator.SetTrigger("SingleToDouble");
+                animator.SetFloat("FallTime", hardFallTime);
                 jumpCount++;
             }
         }
@@ -261,9 +274,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         {
             if (isGrounded())
             {
-                stopwatch.Reset();
+                dodgeStopwatch.Reset();
                 animator.SetFloat("DodgeTime", dodgeDuration);
-                stopwatch.Start();
+                dodgeStopwatch.Start();
                 isDodging = true;
                 animator.SetTrigger("IsDodging");
                 dodgeCount++;
@@ -272,9 +285,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             {
                 if (dodgeCount < dodgeMax)
                 {
-                    stopwatch.Reset();
+                    dodgeStopwatch.Reset();
                     animator.SetFloat("DodgeTime", dodgeDuration);
-                    stopwatch.Start();
+                    dodgeStopwatch.Start();
                     isDodging = true;
                     animator.SetTrigger("IsDodging");
                     dodgeCount++;
@@ -286,27 +299,64 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
 
     public void CheckDodgeTimer()
     {
-        if ((float)(stopwatch.ElapsedMilliseconds) > dodgeDuration)
+        if ((float)(dodgeStopwatch.ElapsedMilliseconds) > dodgeDuration)
         {
             animator.SetFloat("DodgeTime", 0);
-            stopwatch.Stop();
+            dodgeStopwatch.Stop();
+        }
+    }
+
+    public void CheckFallTimer()
+    {
+        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("Falling Idle"))
+        {
+            return;
+        }
+        else
+        {
+            if (!fallStopwatch.IsRunning)
+            {
+                fallStopwatch.Start();
+            }
+            else
+            {
+                UnityEngine.Debug.Log(fallStopwatch.ElapsedMilliseconds);
+                if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
+                {
+                    UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
+                    animator.SetFloat("FallTime", 0);
+                    dodgeStopwatch.Stop();
+                }
+
+            }
+
         }
     }
 
     public void ApplyDodgeForce()
     {
-        moveInput *=  (speed * dodgeSpeed);
+        // Get the forward and right vectors relative to the camera
+        Vector3 dodgeDirection = (playerCamera.transform.forward * moveInput.y + playerCamera.transform.right * moveInput.x).normalized;
+
+        // Add force only in the horizontal direction, ignoring any vertical movement
+        dodgeDirection.y = 0;
+
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.AddForce(new Vector3(moveInput.x, 0, moveInput.y), ForceMode.Impulse);
+
+        // Apply the dodge force as an impulse for a burst of speed
+        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
     }
 
 
     public void RemoveDodgeForce()
     {
-        moveInput /= (speed * dodgeSpeed);
+        // Reset the horizontal velocity (keep the vertical velocity intact if the player is in the air)
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.AddForce(- 1 * new Vector3(moveInput.x, 0, moveInput.y), ForceMode.Impulse);
+        rb.velocity = new Vector3(0, rb.velocity.y, 0);
+
         isDodging = false;
         dodgeCount = 0;
+
     }
 }

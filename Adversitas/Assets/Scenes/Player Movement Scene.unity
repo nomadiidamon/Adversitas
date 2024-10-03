@@ -6231,8 +6231,9 @@ MonoBehaviour:
   doubleJumpSpeed: 6.25
   runningJumpSpeed: 5.86
   dodgeMax: 1
-  dodgeSpeed: 30.9
+  dodgeSpeed: 80.7
   dodgeDuration: 2.66
+  hardFallTime: 0.26
   onSolidSurface: 0
   isJumping: 0
   isSprinting: 0
