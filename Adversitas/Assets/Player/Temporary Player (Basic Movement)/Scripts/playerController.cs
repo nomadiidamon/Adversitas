@@ -5,6 +5,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
+using Unity.VisualScripting;
 
 public class playerController : MonoBehaviour, IMove, ILook, IJump
 {
@@ -35,7 +36,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     [Range(0, 20)][SerializeField] float doubleJumpSpeed;
     [Range(0, 20)][SerializeField] float runningJumpSpeed;
     [Range(0, 5)][SerializeField] int dodgeMax;
-    [Range(0, 100)][SerializeField] float dodgeSpeed;
+    [Range(150, 300)][SerializeField] float dodgeSpeed;
     [Range(0, 20)][SerializeField] float dodgeDuration;
     [Range(0, 5)][SerializeField] float hardFallTime;
 
@@ -89,6 +90,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         CheckFallTimer();
     }
 
+    /// Player movement logic
     public void Move()
     {
         Vector3 cameraForward = playerCamera.transform.forward;
@@ -135,6 +137,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         Physics.SyncTransforms();
     }
 
+    /// Camera look Logic - refer to CameraController for camera collision detection
     public void Look()
     {
         currentYaw += lookInput.x * cameraLookSpeed;
@@ -150,6 +153,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         Physics.SyncTransforms();
     }
 
+    /// Check to see if player is on a solid surface - refer to FootRaycast for details
     public bool isGrounded()
     {
 
@@ -167,6 +171,10 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             {
                 animator.SetBool("IsGrounded", true);
             }
+            if (info.IsName("Hard Landing"))
+            {
+                animator.ResetTrigger("IsDodging");
+            }
             return true;
         }
         else
@@ -179,6 +187,8 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         }
     }
 
+
+    /// Jumping Logic
     public void OnJumpInput(InputAction.CallbackContext context)
     {
         if (context.interaction is TapInteraction)
@@ -255,7 +265,31 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         rb.velocity = verticleVelocity;
     }
 
+    public void CheckFallTimer()
+    {
+        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("Falling Idle"))
+        {
+            return;
+        }
 
+        if (!fallStopwatch.IsRunning)
+        {
+            fallStopwatch.Start();
+        }
+
+        if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
+        {
+            UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
+            animator.SetFloat("FallTime", (float)fallStopwatch.ElapsedMilliseconds);
+        }
+
+    }
+
+
+
+
+    /// Dodging Logic
     public void OnDodgeInput(InputAction.CallbackContext context)
     {
         if (context.interaction is TapInteraction)
@@ -299,72 +333,27 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
 
     public void CheckDodgeTimer()
     {
-        if ((float)(dodgeStopwatch.ElapsedMilliseconds) > dodgeDuration)
+        if (isDodging && (float)(dodgeStopwatch.ElapsedMilliseconds) > dodgeDuration)
         {
             animator.SetFloat("DodgeTime", 0);
             dodgeStopwatch.Stop();
+
+            //possibly unecessary due to funciton being a animation event
+            //
+            RemoveDodgeForce();
+            //
         }
     }
 
-    //public void CheckFallTimer()
-    //{
-    //    AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
-    //    if (!info.IsName("Falling Idle"))
-    //    {
-    //        return;
-    //    }
-    //    else
-    //    {
-    //        if (!fallStopwatch.IsRunning)
-    //        {
-    //            fallStopwatch.Start();
-    //        }
-    //        else
-    //        {
-    //            UnityEngine.Debug.Log(fallStopwatch.ElapsedMilliseconds);
-    //            if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
-    //            {
-    //                UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
-    //                animator.SetFloat("FallTime", 0);
-    //                fallStopwatch.Stop();
-    //            }
-
-    //        }
-
-    //    }
-    //}
-
-    public void CheckFallTimer()
-    {
-        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
-        if (!info.IsName("Falling Idle"))
-        {
-            //if (fallStopwatch.IsRunning)
-            //{
-            //    fallStopwatch.Stop(); // Stop if we are no longer falling
-            //    animator.SetFloat("FallTime", 0); // Reset fall time when transitioning out
-            //}
-            return;
-        }
-
-        if (!fallStopwatch.IsRunning)
-        {
-            fallStopwatch.Start();
-        }
-
-        if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
-        {
-            UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
-            animator.SetFloat("FallTime", (float)fallStopwatch.ElapsedMilliseconds);
-            //fallStopwatch.Reset(); // Reset stopwatch after setting FallTime
-        }
-
-    }
 
     public void ApplyDodgeForce()
     {
         // Get the forward and right vectors relative to the camera
         Vector3 dodgeDirection = (playerCamera.transform.forward * moveInput.y + playerCamera.transform.right * moveInput.x).normalized;
+
+        // If no input, dodge forward
+        if (dodgeDirection == Vector3.zero)
+            dodgeDirection = transform.forward;
 
         // Add force only in the horizontal direction, ignoring any vertical movement
         dodgeDirection.y = 0;
@@ -373,6 +362,8 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
 
         // Apply the dodge force as an impulse for a burst of speed
         rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
+        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
+
     }
 
 
