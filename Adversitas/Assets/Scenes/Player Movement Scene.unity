@@ -6233,7 +6233,7 @@ MonoBehaviour:
   dodgeMax: 1
   dodgeSpeed: 80.7
   dodgeDuration: 2.66
-  hardFallTime: 0.26
+  hardFallTime: 0.19
   onSolidSurface: 0
   isJumping: 0
   isSprinting: 0

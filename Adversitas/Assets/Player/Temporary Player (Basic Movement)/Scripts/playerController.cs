@@ -158,7 +158,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             onSolidSurface = true;
             isJumping = false;
             jumpCount = 0;
-
+            animator.SetFloat("FallTime", 0);
             animator.ResetTrigger("SingleToDouble");
             animator.ResetTrigger("SingleJump");
 
@@ -213,7 +213,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
 
                 isJumping = true;
                 animator.SetTrigger("SingleToDouble");
-                animator.SetFloat("FallTime", hardFallTime);
+                //animator.SetFloat("FallTime", hardFallTime);
                 jumpCount++;
             }
         }
@@ -306,32 +306,59 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         }
     }
 
+    //public void CheckFallTimer()
+    //{
+    //    AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+    //    if (!info.IsName("Falling Idle"))
+    //    {
+    //        return;
+    //    }
+    //    else
+    //    {
+    //        if (!fallStopwatch.IsRunning)
+    //        {
+    //            fallStopwatch.Start();
+    //        }
+    //        else
+    //        {
+    //            UnityEngine.Debug.Log(fallStopwatch.ElapsedMilliseconds);
+    //            if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
+    //            {
+    //                UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
+    //                animator.SetFloat("FallTime", 0);
+    //                fallStopwatch.Stop();
+    //            }
+
+    //        }
+
+    //    }
+    //}
+
     public void CheckFallTimer()
     {
         AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
         if (!info.IsName("Falling Idle"))
         {
+            //if (fallStopwatch.IsRunning)
+            //{
+            //    fallStopwatch.Stop(); // Stop if we are no longer falling
+            //    animator.SetFloat("FallTime", 0); // Reset fall time when transitioning out
+            //}
             return;
         }
-        else
+
+        if (!fallStopwatch.IsRunning)
         {
-            if (!fallStopwatch.IsRunning)
-            {
-                fallStopwatch.Start();
-            }
-            else
-            {
-                UnityEngine.Debug.Log(fallStopwatch.ElapsedMilliseconds);
-                if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
-                {
-                    UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
-                    animator.SetFloat("FallTime", 0);
-                    dodgeStopwatch.Stop();
-                }
-
-            }
-
+            fallStopwatch.Start();
         }
+
+        if ((float)(fallStopwatch.ElapsedMilliseconds) > hardFallTime)
+        {
+            UnityEngine.Debug.Log((float)fallStopwatch.ElapsedMilliseconds);
+            animator.SetFloat("FallTime", (float)fallStopwatch.ElapsedMilliseconds);
+            //fallStopwatch.Reset(); // Reset stopwatch after setting FallTime
+        }
+
     }
 
     public void ApplyDodgeForce()
