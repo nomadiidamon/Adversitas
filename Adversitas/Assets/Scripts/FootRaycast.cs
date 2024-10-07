@@ -11,12 +11,6 @@ public class FootRaycast : MonoBehaviour
     [SerializeField] public float rayLength = 0.5f;
     [SerializeField] public bool isGrounded = false; 
 
-    
-    void Start()
-    {
-        
-    }
-
     void Update()
     {
         RaycastHit hit;

@@ -1,37 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
-using Unity.VisualScripting;
 
-public class playerController : MonoBehaviour, IMove, ILook, IJump
+
+
+public class movementController: MonoBehaviour, IMove, IJump, IDodge
 {
-    /// <summary>
-    /// Original prototype controller - All encompassing. Has been segemented into more managable and specefic controllers. Obsolete
-    /// </summary>
-
-
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
+    [SerializeField] Rigidbody rb;
     [SerializeField] Animator animator;
 
-    [Header("-----Colliders-----")]
-    [SerializeField] CapsuleCollider mainCollider;
-    [SerializeField] CapsuleCollider damageCollider;
+    [Header("-----Ground Detection-----")]
     [SerializeField] BoxCollider leftFoot;
     [SerializeField] BoxCollider rightFoot;
 
-    [Header("-----Camera-----")]
-    [SerializeField] Camera playerCamera;
-    [Range(0, 5)][SerializeField] float cameraLookSpeed = 2f; // Speed of looking around
-    [Range(0, 5)][SerializeField] float distanceFromPlayer = 5f; // Distance of camera from the player
-    [Range(0, 5)][SerializeField] float height = 2f; // Height of the camera above the player
-    [Range(0, 200)][SerializeField] float pitchLimit = 80f; // Limit for pitch to prevent flipping
-    [Range(0, 5)][SerializeField] float playerTurnToCameraSpeed = 2f; // Speed for lerping toward camera direction
-
+    [Header("-----Script Dependencies-----")]
+    [SerializeField] cameraCollisionController collisionController;
+    [SerializeField] cameraLookController lookController;
 
     [Header("-----Attributes-----")]
     [Range(0, 20)][SerializeField] float speed;
@@ -45,46 +32,38 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     [Range(0, 20)][SerializeField] float dodgeDuration;
     [Range(0, 5)][SerializeField] float hardFallTime;
 
+
     private Stopwatch dodgeStopwatch;
     private Stopwatch fallStopwatch;
 
-
     private FootRaycast leftFootRaycast;
     private FootRaycast rightFootRaycast;
+
     public bool onSolidSurface = false;
     public bool isJumping = false;
     public bool isSprinting = false;
     public bool isDodging = false;
+
     private Vector2 moveInput;
-    private Vector2 lookInput;
     private Vector3 verticleVelocity;
-    private float currentYaw;
-    private float currentPitch;
+
     int jumpCount;
     int dodgeCount;
-
 
 
     void Awake()
     {
         playerInput.actions["Move"].performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Move"].canceled += ctx => moveInput = Vector2.zero;
-        playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
         playerInput.actions["Jump"].performed += ctx => OnJumpInput(ctx);
-        playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };   
-        playerInput.actions["Dodge"].performed += ctx => OnDodgeInput(ctx);  
+        playerInput.actions["Sprint"].performed += ctx => { isSprinting = !isSprinting; };
+        playerInput.actions["Dodge"].performed += ctx => OnDodgeInput(ctx);
         dodgeStopwatch = new Stopwatch();
         fallStopwatch = new Stopwatch();
         leftFootRaycast = leftFoot.GetComponent<FootRaycast>();
         rightFootRaycast = rightFoot.GetComponent<FootRaycast>();
         animator.enabled = true;
         animator.stabilizeFeet = true;
-    }
-
-    void Update()
-    {
-        Look();
     }
 
     void FixedUpdate()
@@ -95,14 +74,13 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         CheckFallTimer();
     }
 
-    /// Player movement logic
     public void Move()
     {
-        Vector3 cameraForward = playerCamera.transform.forward;
+        Vector3 cameraForward = lookController.playerCamera.transform.forward;
         cameraForward.y = 0;
         cameraForward.Normalize();
 
-        Vector3 right = playerCamera.transform.right;
+        Vector3 right = lookController.playerCamera.transform.right;
         right.y = 0;
         right.Normalize();
 
@@ -121,7 +99,6 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
                 isSprinting = false;
                 animator.SetTrigger("IsWalking");
             }
-
         }
         else
         {
@@ -132,36 +109,20 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         transform.position += movement * currentSpeed * Time.deltaTime;
 
         animator.SetFloat("VelocityX", moveInput.x);
-        animator.SetFloat("VelocityY", moveInput.y); 
+        animator.SetFloat("VelocityY", moveInput.y);
 
-        if (transform.rotation != playerCamera.transform.rotation)
+        if (transform.rotation != lookController.playerCamera.transform.rotation)
         {
-            Quaternion targetRotation = Quaternion.Euler(0, playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * playerTurnToCameraSpeed);
+            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.playerTurnToCameraSpeed);
         }
         Physics.SyncTransforms();
     }
 
-    /// Camera look Logic - refer to CameraController for camera collision detection
-    public void Look()
-    {
-        currentYaw += lookInput.x * cameraLookSpeed;
-        currentPitch -= lookInput.y * cameraLookSpeed;
-
-        currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
-
-        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
-        Vector3 offset = rotation * new Vector3(0, 0, -distanceFromPlayer) + new Vector3(0, height, 0);
-        playerCamera.transform.position = transform.position + offset;
-
-        playerCamera.transform.LookAt(transform.position + Vector3.up * height);
-        Physics.SyncTransforms();
-    }
 
     /// Check to see if player is on a solid surface - refer to FootRaycast for details
     public bool isGrounded()
     {
-
         if (rightFootRaycast.isGrounded && leftFootRaycast.isGrounded)
         {
             onSolidSurface = true;
@@ -193,6 +154,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
     }
 
 
+
+
+
     /// Jumping Logic
     public void OnJumpInput(InputAction.CallbackContext context)
     {
@@ -201,7 +165,6 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             Jump();
         }
     }
-
     public void Jump()
     {
         if (isGrounded())
@@ -221,7 +184,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             }
 
         }
-        else 
+        else
         {
             if (!isGrounded() && jumpCount < jumpMax)
             {
@@ -234,42 +197,36 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         }
         Physics.SyncTransforms();
     }
-
     public void ApplyJumpForce()
     {
         verticleVelocity.y = jumpSpeed;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }
-
     public void ApplyHopForce()
     {
         verticleVelocity.y = jumpSpeed / 2;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }
-
     public void ApplySecondaryJumpForce()
     {
         verticleVelocity.y = doubleJumpSpeed;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }
-
     public void ApplyRunningJumpForce()
     {
         verticleVelocity.y = runningJumpSpeed;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }
-
     public void StartFalling()
     {
         verticleVelocity.y = 0;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.velocity = verticleVelocity;
     }
-
     public void CheckFallTimer()
     {
         AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
@@ -302,7 +259,6 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             Dodge();
         }
     }
-
     public void Dodge()
     {
         if (isDodging)
@@ -332,10 +288,9 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
                     dodgeCount++;
                 }
             }
-            
+
         }
     }
-
     public void CheckDodgeTimer()
     {
         if (isDodging && (float)(dodgeStopwatch.ElapsedMilliseconds) > dodgeDuration)
@@ -349,12 +304,10 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
             //
         }
     }
-
-
     public void ApplyDodgeForce()
     {
         // Get the forward and right vectors relative to the camera
-        Vector3 dodgeDirection = (playerCamera.transform.forward * moveInput.y + playerCamera.transform.right * moveInput.x).normalized;
+        Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
 
         // If no input, dodge forward
         if (dodgeDirection == Vector3.zero)
@@ -368,10 +321,7 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
         // Apply the dodge force as an impulse for a burst of speed
         rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
         rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
-
     }
-
-
     public void RemoveDodgeForce()
     {
         // Reset the horizontal velocity (keep the vertical velocity intact if the player is in the air)
@@ -380,6 +330,6 @@ public class playerController : MonoBehaviour, IMove, ILook, IJump
 
         isDodging = false;
         dodgeCount = 0;
-
     }
+
 }
