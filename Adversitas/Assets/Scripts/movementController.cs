@@ -15,6 +15,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     [Header("-----Ground Detection-----")]
     [SerializeField] BoxCollider leftFoot;
     [SerializeField] BoxCollider rightFoot;
+    [SerializeField] float footRayLength;
 
     [Header("-----Script Dependencies-----")]
     [SerializeField] cameraCollisionController collisionController;
@@ -62,6 +63,8 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         fallStopwatch = new Stopwatch();
         leftFootRaycast = leftFoot.GetComponent<FootRaycast>();
         rightFootRaycast = rightFoot.GetComponent<FootRaycast>();
+        leftFootRaycast.rayLength = footRayLength;
+        rightFootRaycast.rayLength = footRayLength;
         animator.enabled = true;
         animator.stabilizeFeet = true;
     }
@@ -114,7 +117,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         if (transform.rotation != lookController.playerCamera.transform.rotation)
         {
             Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.playerTurnToCameraSpeed);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.normalCameraSettings.turnSpeed);
         }
         Physics.SyncTransforms();
     }

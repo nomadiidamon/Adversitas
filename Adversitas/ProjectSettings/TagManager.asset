@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ground
   - Environment
+  - Enemy
+  - Boss
   layers:
   - Default
   - TransparentFX
@@ -16,8 +18,8 @@ TagManager:
   - Ground
   - Wall
   - Environment
-  - 
-  - 
+  - Enemy
+  - Boss
   - 
   - 
   - 
