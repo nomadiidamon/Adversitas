@@ -483,6 +483,7 @@ Transform:
   m_Children:
   - {fileID: 1407258137155768409}
   - {fileID: 8983015228776928605}
+  - {fileID: 134914795716717527}
   m_Father: {fileID: 6904741717550447361}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &6165164951159702869
@@ -553,7 +554,7 @@ CapsuleCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
@@ -1200,6 +1201,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8069699366685701434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4217139592817137663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 134914795716717527}
+  m_Layer: 3
+  m_Name: Center of Mass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &134914795716717527
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4217139592817137663}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8366972703435057894}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4226804255124833570
 GameObject:
   m_ObjectHideFlags: 0
@@ -1531,11 +1563,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInput: {fileID: 8831577307781240873}
   playerCamera: {fileID: 908783412554455901}
-  cameraLookSpeed: 2
-  distanceFromPlayer: 3
-  height: 1.7
-  pitchLimit: 60
-  playerTurnToCameraSpeed: 5
+  normalCameraSettings:
+    lookSpeed: 2
+    distanceFromPlayer: 3
+    height: 1.7
+    pitchLimit: 80
+    turnSpeed: 3
+  combatCameraSettings:
+    lookSpeed: 2
+    distanceFromPlayer: 5
+    height: 2
+    pitchLimit: 60
+    turnSpeed: 3
+  lockOnDistance: 100
+  cameraChangeSpeed: 2
 --- !u!1 &5191827052951471494
 GameObject:
   m_ObjectHideFlags: 0
