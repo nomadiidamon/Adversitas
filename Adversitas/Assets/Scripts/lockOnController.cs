@@ -10,14 +10,14 @@ public class lockOnController : MonoBehaviour
     public bool isLockedOn = false; // Whether the camera is currently locked on
     private Transform playerPosition;
     private Camera playerCamera;
-    private cameraSettings normalSettings;
+    private cameraSettings combatSettings;
 
     public void Initialize(Transform playerPosition, Camera playerCamera, float maxDistance, cameraSettings normal)
     {
         this.playerPosition = playerPosition;
         this.playerCamera = playerCamera;
         lockOnDistance = maxDistance;
-        normalSettings = normal;
+        combatSettings = normal;
     }
 
     public void ToggleLockOn()
@@ -43,10 +43,12 @@ public class lockOnController : MonoBehaviour
         if (lockOnTarget != null)
         {
             playerCamera.transform.LookAt(lockOnTarget.position + Vector3.up * settings.height);
+            combatSettings.SmoothCameraTransitions(combatSettings, settings);
         }
         else
         {
             playerCamera.transform.LookAt(playerPosition.position + Vector3.up * settings.height);
+            combatSettings.SmoothCameraTransitions(combatSettings, settings);
         }
     }
 
@@ -63,7 +65,7 @@ public class lockOnController : MonoBehaviour
 
         if (isLockedOn && lockOnTarget != null)
         {
-            SwitchTarget();
+            //SwitchTarget();
             return;
         }
 
@@ -89,7 +91,7 @@ public class lockOnController : MonoBehaviour
         }
         if (lockOnTarget == null)
         {
-            UpdateCombatCamera(normalSettings);
+            UpdateCombatCamera(combatSettings);
             ToggleLockOn();
         }
     }
@@ -108,10 +110,10 @@ public class lockOnController : MonoBehaviour
         return true;
     }
 
-    public void SwitchTarget()
-    {
+    //public void SwitchTarget()
+    //{
 
-    }
+    //}
 
     public void ResetLockOn()
     {

@@ -1,32 +1,53 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.Splines.Interpolators;
 
 [System.Serializable]
 public class cameraSettings
 {
+    /// <summary> 
+    ///     "--##--Any additional factors should be added to the back of the vector in the 'SmoothTransition' function and in the back of teh GetValues function to avoid range issues"
+    /// </summary>
 
-
-    [Range(0, 5)] public float lookSpeed = 2f;
-    [Range(0, 5)] public float distanceFromPlayer = 5f;
-    [Range(0, 5)] public float height = 2f;
+    [Range(0, 25)] public float lookSpeed = 2f;
+    [Range(0, 15)] public float distanceFromPlayer = 5f;
+    [Range(0, 15)] public float height = 2f;
     [Range(0, 200)] public float pitchLimit = 80f;
-    [Range(0, 5)] public float turnSpeed = 2f;
+    [Range(0, 25)] public float turnSpeed = 2f;
 
     public float[] GetValues() {     
         float [] fields = { lookSpeed, distanceFromPlayer, height, pitchLimit, turnSpeed };
+        /// Possible extra value(s): 
+        ///     Individual transition speeds for more finite adjustments
         return fields;
     }
 
-    public void SmoothTransition(float[] values, float changeSpeed = 5f)
+    public void SmoothCameraTransitions(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
     {
-        lookSpeed = Mathf.Lerp(lookSpeed, values[0], Time.deltaTime * changeSpeed);
-        distanceFromPlayer = Mathf.Lerp(distanceFromPlayer, values[0], Time.deltaTime * changeSpeed);
-        height = Mathf.Lerp(height, values[0], Time.deltaTime * changeSpeed);
-        pitchLimit = Mathf.Lerp(pitchLimit, values[0], Time.deltaTime * changeSpeed);
-        turnSpeed = Mathf.Lerp(turnSpeed, values[0], Time.deltaTime * changeSpeed);
+        SmoothLookSpeed(currentCam, futureCam, changeSpeed);
+        SmoothCameraDistance(currentCam, futureCam, changeSpeed);
+        SmoothHeight(currentCam, futureCam, changeSpeed);
+        SmoothPitchLimit(currentCam, futureCam, changeSpeed);
+        SmoothTurnSpeed(currentCam, futureCam, changeSpeed);
+    }
 
+    private static void SmoothCameraDistance(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
+    {
+        currentCam.distanceFromPlayer = Mathf.Lerp(currentCam.distanceFromPlayer, futureCam.distanceFromPlayer, Time.deltaTime * changeSpeed);
+    }
+    private static void SmoothLookSpeed(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
+    {
+        currentCam.lookSpeed = Mathf.Lerp(currentCam.lookSpeed, futureCam.lookSpeed, Time.deltaTime * changeSpeed);
+    }
+    private static void SmoothHeight(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
+    {
+        currentCam.height = Mathf.Lerp(currentCam.height, futureCam.height, Time.deltaTime * changeSpeed);
+    }
+    private static void SmoothPitchLimit(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
+    {
+        currentCam.pitchLimit = Mathf.Lerp(currentCam.pitchLimit, futureCam.pitchLimit, Time.deltaTime * changeSpeed);
+    }
+    private static void SmoothTurnSpeed(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
+    {
+        currentCam.turnSpeed = Mathf.Lerp(currentCam.turnSpeed, futureCam.turnSpeed, Time.deltaTime * changeSpeed);
     }
 }
