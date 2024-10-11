@@ -20,6 +20,8 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     [Header("-----Script Dependencies-----")]
     [SerializeField] cameraCollisionController collisionController;
     [SerializeField] cameraLookController lookController;
+    [SerializeField] lockOnController lockedOnController;
+
 
     [Header("-----Attributes-----")]
     [Range(0, 20)][SerializeField] float speed;
@@ -79,6 +81,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
     public void Move()
     {
+
         Vector3 cameraForward = lookController.playerCamera.transform.forward;
         cameraForward.y = 0;
         cameraForward.Normalize();
@@ -110,9 +113,14 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         }
 
         transform.position += movement * currentSpeed * Time.deltaTime;
+        
+
+        
 
         animator.SetFloat("VelocityX", moveInput.x);
         animator.SetFloat("VelocityY", moveInput.y);
+       
+
 
         if (transform.rotation != lookController.playerCamera.transform.rotation)
         {
@@ -309,21 +317,22 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     }
     public void ApplyDodgeForce()
     {
-        // Get the forward and right vectors relative to the camera
-        Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
 
-        // If no input, dodge forward
-        if (dodgeDirection == Vector3.zero)
-            dodgeDirection = transform.forward;
+            // Get the forward and right vectors relative to the camera
+            Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
 
-        // Add force only in the horizontal direction, ignoring any vertical movement
-        dodgeDirection.y = 0;
+            // If no input, dodge forward
+            if (dodgeDirection == Vector3.zero)
+                dodgeDirection = transform.forward;
 
-        Rigidbody rb = GetComponent<Rigidbody>();
+            // Add force only in the horizontal direction, ignoring any vertical movement
+            dodgeDirection.y = 0;
 
-        // Apply the dodge force as an impulse for a burst of speed
-        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
-        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
+            Rigidbody rb = GetComponent<Rigidbody>();
+            // Apply the dodge force as an impulse for a burst of speed
+            rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.VelocityChange);
+            //rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
+        
     }
     public void RemoveDodgeForce()
     {

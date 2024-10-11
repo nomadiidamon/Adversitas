@@ -14,13 +14,6 @@ public class cameraSettings
     [Range(0, 200)] public float pitchLimit = 80f;
     [Range(0, 25)] public float turnSpeed = 2f;
 
-    public float[] GetValues() {     
-        float [] fields = { lookSpeed, distanceFromPlayer, height, pitchLimit, turnSpeed };
-        /// Possible extra value(s): 
-        ///     Individual transition speeds for more finite adjustments
-        return fields;
-    }
-
     public void SmoothCameraTransitions(cameraSettings currentCam, cameraSettings futureCam, float changeSpeed = 5f)
     {
         SmoothLookSpeed(currentCam, futureCam, changeSpeed);
@@ -50,4 +43,5 @@ public class cameraSettings
     {
         currentCam.turnSpeed = Mathf.Lerp(currentCam.turnSpeed, futureCam.turnSpeed, Time.deltaTime * changeSpeed);
     }
+
 }

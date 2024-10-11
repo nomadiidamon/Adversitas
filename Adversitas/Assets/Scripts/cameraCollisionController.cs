@@ -68,7 +68,7 @@ public class cameraCollisionController : MonoBehaviour
         // Step 2: Perform SphereCast and Check Collision
         RaycastHit hit;
         bool isColliding = PerformSphereCast(desiredPosition, out hit);
-        DebugSphereCastVisualization(cameraPosition.position, desiredPosition, isColliding, hit);
+        //DebugSphereCastVisualization(cameraPosition.position, desiredPosition, isColliding, hit);
 
         // Step 3: Handle Collision Response
         if (isColliding)

@@ -1,23 +1,59 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
 
 public class lockOnController : MonoBehaviour
 {
+    [Header("-----Components-----")]
+    [SerializeField] PlayerInput playerInput;
+    [SerializeField] public Camera playerCamera;
+    [SerializeField] public Transform lockedOnCameraPosition;
+    [SerializeField] public Transform lockedOnCameraPositionInverse;
+    [SerializeField] public Transform playerCenterOfMass;
+
+
+    [Header("-----Combat Camera Factors-----")]
+    [SerializeField] public cameraSettings combatCameraSettings;
+    [SerializeField] public float lockOnDistance = 5f; // Distance from the target when locked on
+    [SerializeField] public float targetSwitchSpeed; // Distance from the target when locked on
+
+
     [Header("-----LockOn-----")]
     public Transform lockOnTarget; // The target to lock onto
-    private float lockOnDistance = 5f; // Distance from the target when locked on
     public bool isLockedOn = false; // Whether the camera is currently locked on
-    private Transform playerPosition;
-    private Camera playerCamera;
-    private cameraSettings combatSettings;
 
-    public void Initialize(Transform playerPosition, Camera playerCamera, float maxDistance, cameraSettings normal)
+    private cameraLookController cameraLookController;
+    private Vector2 targetSwitchInput;
+    private bool isSwitching = false;
+    private bool leftShoulder = false;
+
+
+    private int currentTarget = 0;
+
+    private List<LockOnMe> possibleTargets = new List<LockOnMe>();
+
+
+
+    private void Awake()
     {
-        this.playerPosition = playerPosition;
-        this.playerCamera = playerCamera;
-        lockOnDistance = maxDistance;
-        combatSettings = normal;
+        playerInput.actions["LockOn"].performed += ctx => ToggleLockOn();
+        playerInput.actions["SwitchTarget"].performed += ctx => targetSwitchInput = ctx.ReadValue<Vector2>();
+        playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
+        cameraLookController = GetComponentInParent<cameraLookController>();
+
+    }
+
+
+    private void Update()
+    {
+        SwitchTarget();
+        if (isLockedOn)
+        {
+            Debug.DrawLine(playerCenterOfMass.position, lockOnTarget.position);
+        }
+        SwitchCameraShoulder();
     }
 
     public void ToggleLockOn()
@@ -29,7 +65,7 @@ public class lockOnController : MonoBehaviour
         {
             if (lockOnTarget == null)
             {
-                FindCameraTarget();
+                FindCameraTarget();            
             }
         }
         else
@@ -38,38 +74,35 @@ public class lockOnController : MonoBehaviour
         }
     }
 
-    public void UpdateCombatCamera(cameraSettings settings)
+    public void UpdateCombatCamera()
     {
         if (lockOnTarget != null)
         {
-            playerCamera.transform.LookAt(lockOnTarget.position + Vector3.up * settings.height);
-            combatSettings.SmoothCameraTransitions(combatSettings, settings);
+            playerCamera.transform.position = lockedOnCameraPosition.position;
+            Quaternion targetRot = Quaternion.LookRotation(lockOnTarget.position- playerCamera.transform.position);
+            playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRot, targetSwitchSpeed);
+            combatCameraSettings.SmoothCameraTransitions(combatCameraSettings, cameraLookController.normalCameraSettings, targetSwitchSpeed);
+            isSwitching = false;
         }
         else
         {
-            playerCamera.transform.LookAt(playerPosition.position + Vector3.up * settings.height);
-            combatSettings.SmoothCameraTransitions(combatSettings, settings);
+            cameraLookController.Look();
         }
     }
 
 
-
-    /// Performs based on foot position. 
-    /// Needs to be given a solid center of mass position to help alleviate possible targeting errors
-    /// Still functional
     public void FindCameraTarget()
     {
-        Collider[] targets = Physics.OverlapSphere(playerPosition.position, lockOnDistance);
-
-        if (targets.Length <= 0) return;
-
         if (isLockedOn && lockOnTarget != null)
         {
-            //SwitchTarget();
+            SwitchTarget();
             return;
         }
+        possibleTargets.Clear();
+        Collider[] targets = Physics.OverlapSphere(playerCenterOfMass.position + Vector3.up, lockOnDistance);
+        if (targets.Length <= 0) return;
 
-        Debug.Log("Searching for targets");
+
         for (int i = 0; i < targets.Length; i++)
         {
             GameObject parent = targets[i].gameObject;
@@ -78,10 +111,10 @@ public class lockOnController : MonoBehaviour
             {
                 if (IsTargetVisible(parent.transform))
                 {
-                    enemy.CameraFollowsMe(playerCamera);
-                    lockOnTarget = enemy.lockOnPosition;
-                    Debug.Log(enemy + " is the new target");
-                    return;
+                    if (!possibleTargets.Contains(enemy))
+                    {
+                        possibleTargets.Add(enemy);
+                    }
                 }
                 else
                 {
@@ -89,9 +122,17 @@ public class lockOnController : MonoBehaviour
                 }
             }
         }
+
+        SortTargetsByDistance();
+        if (possibleTargets.Count != 0)
+        {
+            lockOnTarget = possibleTargets[currentTarget].lockOnPosition;
+            possibleTargets[currentTarget].CameraFollowsMe(playerCamera);
+        }
+
         if (lockOnTarget == null)
         {
-            UpdateCombatCamera(combatSettings);
+            UpdateCombatCamera();
             ToggleLockOn();
         }
     }
@@ -99,7 +140,7 @@ public class lockOnController : MonoBehaviour
     private bool IsTargetVisible(Transform target)
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerPosition.position, target.position, out hit, lockOnDistance))
+        if (Physics.Raycast(playerCenterOfMass.position, target.position, out hit, lockOnDistance))
         {
             if (hit.collider.gameObject.layer != 9)
             {
@@ -110,13 +151,101 @@ public class lockOnController : MonoBehaviour
         return true;
     }
 
-    //public void SwitchTarget()
-    //{
+    public void SortTargetsByDistance()
+    {
+        possibleTargets.Sort((first, second) =>
+        {
+            float firstDistance = (playerCenterOfMass.position - first.lockOnPosition.position).magnitude;
+            float secondDistance = (playerCenterOfMass.position - second.lockOnPosition.position).magnitude;
 
-    //}
+            return firstDistance.CompareTo(secondDistance);
+        });
+    }
+
+    public void SwitchTarget()
+    {
+
+        if (isSwitching)
+        {
+            return;
+        }
+
+        if (isLockedOn && possibleTargets.Count > 1)
+        {
+            isSwitching = true;
+
+            if (Mathf.Abs(targetSwitchInput.x) > 0.35f) // Check for significant input
+            {
+                int change = targetSwitchInput.x > 0 ? 1 : -1;
+                StartCoroutine(delaySwitching(change));
+            }
+
+            UpdateCombatCamera();
+        }
+        targetSwitchInput = Vector2.zero; // Clear input after processing
+
+    }
+    public IEnumerator delaySwitching(int change)
+    {
+        yield return new WaitForSecondsRealtime(.35f);
+        yield return StartCoroutine(doTheSwitch(change));
+    }
+
+    public IEnumerator doTheSwitch(int change)
+    {
+        SwitchTargetIndex(change);
+        yield return new WaitForSecondsRealtime(.15f);
+    }
+
+    public void SwitchTargetIndex(int change)
+    {
+
+        // Ensure we only switch if we are locked on and there are multiple targets
+        if (isLockedOn && possibleTargets.Count > 1)
+        {
+            // Increment or decrement the currentTarget based on the change value
+            if (change > 0)
+            {
+                currentTarget = (currentTarget + 1) % possibleTargets.Count; // Loop back to the start if at the end
+            }
+            else if (change < 0)
+            {
+                currentTarget = (currentTarget - 1 + possibleTargets.Count) % possibleTargets.Count; // Loop back to the end if at the start
+            }
+
+            // Update the lockOnTarget if it's different
+            if (lockOnTarget != possibleTargets[currentTarget].lockOnPosition)
+            {
+                lockOnTarget = possibleTargets[currentTarget].lockOnPosition;
+                possibleTargets[currentTarget].CameraFollowsMe(playerCamera);
+            }
+        }
+    }
+
+    public void ToggleShoulder()
+    {
+        leftShoulder = !leftShoulder;
+    }
+
+    public void SwitchCameraShoulder()
+    {
+        if (isLockedOn && leftShoulder)
+        {
+            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPosition.position, lockedOnCameraPositionInverse.position, targetSwitchSpeed);
+            
+        }
+        else
+        {
+            leftShoulder = false;
+            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPositionInverse.position, lockedOnCameraPosition.position, targetSwitchSpeed);
+        }
+
+    }
 
     public void ResetLockOn()
     {
         lockOnTarget = null;
+        possibleTargets.Clear();
+        currentTarget = 0;
     }
 }
