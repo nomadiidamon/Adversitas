@@ -15,13 +15,12 @@ public class lockOnController : MonoBehaviour
 
 
     [Header("-----Combat Camera Factors-----")]
-    [Range(0, 25)][SerializeField] public float lookSpeed = 2f;
+    [Range(0, 2)][SerializeField] public float targetSwitchSpeed = 2f;
     [Range(0, 15)][SerializeField] public float distanceFromPlayer = 5f;
     [Range(0, 15)][SerializeField] public float height = 2f;
     [Range(0, 200)][SerializeField] public float pitchLimit = 80f;
     [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
     [SerializeField] public float lockOnDistance = 5f; // Distance from the target when locked on
-    [SerializeField] public float targetSwitchSpeed; // Distance from the target when locked on
 
 
     [Header("-----LockOn-----")]
@@ -31,7 +30,7 @@ public class lockOnController : MonoBehaviour
     private cameraLookController cameraLookController;
     private Vector2 targetSwitchInput;
     private bool isSwitching = false;
-    private bool leftShoulder = false;
+    public bool leftShoulder = false;
 
 
     private int currentTarget = 0;
@@ -74,6 +73,7 @@ public class lockOnController : MonoBehaviour
         }
         else
         {
+            playerCamera.transform.position = Vector3.Lerp(playerCamera.transform.position, cameraLookController.defaultCameraPosition.position, cameraLookController.turnSpeed * Time.deltaTime);
             ResetLockOn();
         }
     }
@@ -220,7 +220,7 @@ public class lockOnController : MonoBehaviour
             if (lockOnTarget != possibleTargets[currentTarget].lockOnPosition)
             {
                 lockOnTarget = possibleTargets[currentTarget].lockOnPosition;
-                possibleTargets[currentTarget].CameraFollowsMe(playerCamera);
+                //possibleTargets[currentTarget].CameraFollowsMe(playerCamera);
             }
         }
     }
@@ -232,15 +232,15 @@ public class lockOnController : MonoBehaviour
 
     public void SwitchCameraShoulder()
     {
-        if (isLockedOn && !leftShoulder)
+        if (isLockedOn && leftShoulder)
         {
-            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPosition.position, lockedOnCameraPositionInverse.position, targetSwitchSpeed);
-            
+            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPosition.position, lockedOnCameraPositionInverse.position, turnSpeed);
+
         }
         else
         {
             //leftShoulder = true;
-            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPositionInverse.position, lockedOnCameraPosition.position, targetSwitchSpeed);
+            playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPositionInverse.position, lockedOnCameraPosition.position, turnSpeed);
         }
 
     }

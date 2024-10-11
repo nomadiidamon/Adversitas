@@ -23,6 +23,7 @@ public class uiManager : MonoBehaviour
             enemyCanvas.transform.localScale = Vector3.one * ((player.playerCamera.transform.position - player.lockOnTarget.position).magnitude * (lockOnReticle.transform.localScale.y / 2));
             lockOnReticle.transform.position = player.lockOnTarget.transform.position;
             lockOnReticle.transform.LookAt(player.playerCamera.transform);
+            
         }
         else
         {
