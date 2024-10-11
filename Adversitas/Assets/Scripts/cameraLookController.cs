@@ -11,7 +11,11 @@ public class cameraLookController : MonoBehaviour, ILook
     [SerializeField] public Transform defaultCameraPosition;
 
     [Header("-----Normal Camera Factors-----")]
-    [SerializeField] public cameraSettings normalCameraSettings;
+    [Range(0, 4)][SerializeField] public float lookSpeed = 2f;
+    [Range(0, 25)][SerializeField] public float distanceFromPlayer = 5f;
+    [Range(0, 15)][SerializeField] public float height = 2f;
+    [Range(0, 200)][SerializeField] public float pitchLimit = 80f;
+    [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
 
     private Vector2 lookInput;
     private float currentYaw;
@@ -25,7 +29,7 @@ public class cameraLookController : MonoBehaviour, ILook
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
 
         lockOnController = GetComponentInParent<lockOnController>();
-        //playerCamera.transform.position = defaultCameraPosition.position;
+        playerCamera.transform.position = defaultCameraPosition.position;
     }
 
     void Update()
@@ -49,17 +53,20 @@ public class cameraLookController : MonoBehaviour, ILook
 
     void RotateCamera()
     {
-        currentYaw += lookInput.x * normalCameraSettings.lookSpeed;
-        currentPitch -= lookInput.y * normalCameraSettings.lookSpeed;
-        currentPitch = Mathf.Clamp(currentPitch, -normalCameraSettings.pitchLimit, normalCameraSettings.pitchLimit);
+        currentYaw += lookInput.x * lookSpeed;
+        currentPitch -= lookInput.y * lookSpeed;
+        currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
     }
 
     public void UpdateNormalCamera()
     {
+        playerCamera.transform.position = defaultCameraPosition.position;
         Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
-        Vector3 offset = rotation * new Vector3(0, 0, -normalCameraSettings.distanceFromPlayer) + new Vector3(0, normalCameraSettings.height, 0);
+        Vector3 offset = rotation * new Vector3(0, 0, -distanceFromPlayer) + new Vector3(0, height, 0);
         playerCamera.transform.position = transform.position + offset;
-        playerCamera.transform.LookAt(transform.position + Vector3.up * normalCameraSettings.height);
+        playerCamera.transform.LookAt(transform.position + Vector3.up * height);
     }    
+
+
 
 }

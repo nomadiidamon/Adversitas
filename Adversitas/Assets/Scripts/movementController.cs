@@ -18,7 +18,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     [SerializeField] float footRayLength;
 
     [Header("-----Script Dependencies-----")]
-    [SerializeField] cameraCollisionController collisionController;
+    //[SerializeField] cameraCollisionController collisionController;
     [SerializeField] cameraLookController lookController;
     [SerializeField] lockOnController lockedOnController;
 
@@ -119,13 +119,13 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
         animator.SetFloat("VelocityX", moveInput.x);
         animator.SetFloat("VelocityY", moveInput.y);
-       
+
 
 
         if (transform.rotation != lookController.playerCamera.transform.rotation)
         {
             Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.normalCameraSettings.turnSpeed);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
         }
         Physics.SyncTransforms();
     }
