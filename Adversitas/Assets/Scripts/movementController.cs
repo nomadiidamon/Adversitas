@@ -152,6 +152,10 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
             {
                 animator.ResetTrigger("IsDodging");
             }
+            if (isDodging)
+            {
+                isDodging = false;
+            }
             return true;
         }
         else
@@ -278,6 +282,10 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         }
         else
         {
+            Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
+            if (dodgeDirection == Vector3.zero)
+                return;
+
             if (isGrounded())
             {
                 dodgeStopwatch.Reset();
@@ -309,30 +317,19 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
             animator.SetFloat("DodgeTime", 0);
             dodgeStopwatch.Stop();
 
-            //possibly unecessary due to funciton being a animation event
-            //
-            RemoveDodgeForce();
-            //
+
+
         }
     }
     public void ApplyDodgeForce()
     {
+        Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
 
-            // Get the forward and right vectors relative to the camera
-            Vector3 dodgeDirection = (lookController.playerCamera.transform.forward * moveInput.y + lookController.playerCamera.transform.right * moveInput.x).normalized;
+        dodgeDirection.y = 0;
 
-            // If no input, dodge forward
-            if (dodgeDirection == Vector3.zero)
-                dodgeDirection = transform.forward;
+        Rigidbody rb = GetComponent<Rigidbody>();
 
-            // Add force only in the horizontal direction, ignoring any vertical movement
-            dodgeDirection.y = 0;
-
-            Rigidbody rb = GetComponent<Rigidbody>();
-            // Apply the dodge force as an impulse for a burst of speed
-            rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.VelocityChange);
-            //rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
-        
+        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse); 
     }
     public void RemoveDodgeForce()
     {
