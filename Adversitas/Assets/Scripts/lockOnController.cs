@@ -11,36 +11,28 @@ public class lockOnController : MonoBehaviour
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
     [SerializeField] public CinemachineVirtualCamera lockOnCamera;
-    [SerializeField] public Transform lockedOnCameraPosition;
-    [SerializeField] public Transform lockedOnCameraPositionInverse;
     [SerializeField] public Transform playerCenterOfMass;
-
+    public CinemachineTargetGroup targetGroup;
 
     [Header("-----Combat Camera Factors-----")]
-    [Range(0, 2)][SerializeField] public float targetSwitchSpeed = 2f;
-    [Range(0, 15)][SerializeField] public float distanceFromPlayer = 5f;
-    [Range(0, 15)][SerializeField] public float height = 2f;
-    [Range(0, 200)][SerializeField] public float pitchLimit = 80f;
-    [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
-    [SerializeField] public float lockOnDistance = 5f;
+    [Range(0, 10)][SerializeField] public float targetSwitchSpeed = 2f;
+    [Range(0, 150)][SerializeField] public float lockOnDistance = 5f;
     [SerializeField] public float targetWeight;
     [SerializeField] public float targetRadius;
-
+    [SerializeField] public float shoulderSwitchSpeed;
 
     [Header("-----LockOn-----")]
     public Transform lockOnTarget;
     public bool isLockedOn = false;
-
-    private cameraLookController cameraLookController;
-    private Vector2 targetSwitchInput;
-    private bool isSwitching = false;
     public bool leftShoulder = false;
 
-
+    private cameraLookController cameraLookController;
+    private float targetLockTime = 0f;
+    private const float targetLockThreshold = 0.25f;
+    private Vector2 targetSwitchInput;
+    private bool isSwitching = false;
     private int currentTarget = 0;
-
     private List<LockOnMe> possibleTargets = new List<LockOnMe>();
-
 
 
     private void Awake()
@@ -50,16 +42,24 @@ public class lockOnController : MonoBehaviour
         playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
         cameraLookController = GetComponentInParent<cameraLookController>();
 
+        if (targetGroup == null)
+        {
+            targetGroup = FindObjectOfType<CinemachineTargetGroup>();
+            if (targetGroup == null)
+            {
+                targetGroup = new GameObject("TargetGroup").AddComponent<CinemachineTargetGroup>();
+            }
+        }
     }
-
 
     private void Update()
     {
         SwitchTarget();
         if (isLockedOn)
         {
+            targetLockTime += Time.deltaTime;
             Debug.DrawLine(playerCenterOfMass.position, lockOnTarget.position);
-            //SwitchCameraShoulder();
+            SwitchCameraShoulder();
         }
     }
 
@@ -72,6 +72,11 @@ public class lockOnController : MonoBehaviour
 
         if (isLockedOn)
         {
+            targetGroup.AddMember(transform, .35f, 10);
+            targetGroup.m_PositionMode = CinemachineTargetGroup.PositionMode.GroupAverage;
+            targetGroup.m_RotationMode = CinemachineTargetGroup.RotationMode.GroupAverage;
+            targetGroup.m_UpdateMethod = CinemachineTargetGroup.UpdateMethod.FixedUpdate;
+
             if (lockOnTarget == null)
             {
                 FindCameraTarget();            
@@ -79,18 +84,15 @@ public class lockOnController : MonoBehaviour
             if (lockOnCamera != null && brain != null)
             {
                 brain.ActiveVirtualCamera.Priority = 10;
+                lockOnCamera.LookAt = targetGroup.transform;
             }
         }
         else
         {
-            playerCamera.transform.position = Vector3.Lerp(playerCamera.transform.position, cameraLookController.defaultCameraPosition.position, cameraLookController.turnSpeed * Time.deltaTime);
-
-            // Deactivate the lockOnCamera
             if (lockOnCamera != null && brain != null)
             {
-                brain.ActiveVirtualCamera.Priority = 0; // Set lower priority to deactivate
+                brain.ActiveVirtualCamera.Priority = 0;
             }
-
             ResetLockOn();
         }
     }
@@ -109,7 +111,6 @@ public class lockOnController : MonoBehaviour
                 lockOnCamera.Priority = 10;
             }
 
-            playerCamera.transform.position = lockedOnCameraPosition.position;
             Quaternion targetRot = Quaternion.LookRotation(lockOnTarget.position- playerCamera.transform.position);
             playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRot, targetSwitchSpeed);
             lockOnCamera.transform.position = playerCamera.transform.position;
@@ -122,7 +123,6 @@ public class lockOnController : MonoBehaviour
         }
     }
 
-
     public void FindCameraTarget()
     {
         if (isLockedOn && lockOnTarget != null)
@@ -133,7 +133,6 @@ public class lockOnController : MonoBehaviour
         possibleTargets.Clear();
         Collider[] targets = Physics.OverlapSphere(playerCenterOfMass.position + Vector3.up, lockOnDistance);
         if (targets.Length <= 0) return;
-
 
         for (int i = 0; i < targets.Length; i++)
         {
@@ -161,9 +160,7 @@ public class lockOnController : MonoBehaviour
             lockOnTarget = possibleTargets[currentTarget].lockOnPosition;
             possibleTargets[currentTarget].CameraFollowsMe(playerCamera);
             lockOnCamera.Follow = transform;
-            lockOnCamera.LookAt = lockOnTarget;
-            //lockOnCamera.enabled = true;
-            //fCreateTargetGroup(targetWeight, targetRadius);
+            targetGroup.AddMember(lockOnTarget, targetWeight, targetRadius);
         }
 
         if (lockOnTarget == null)
@@ -205,32 +202,25 @@ public class lockOnController : MonoBehaviour
             return;
         }
 
+        if (targetLockTime < targetLockThreshold)
+        {
+            return;
+        }
+
         if (isLockedOn && possibleTargets.Count > 1)
         {
             isSwitching = true;
-
-            if (Mathf.Abs(targetSwitchInput.x) > 0.35f)
+            if (Mathf.Abs(targetSwitchInput.x) > 0.5f)
             {
                 int change = targetSwitchInput.x > 0 ? 1 : -1;
-                StartCoroutine(delaySwitching(change));
+                SwitchTargetIndex(change);
+                targetLockTime = 0;
             }
-
             UpdateCombatCamera();
         }
         targetSwitchInput = Vector2.zero;
-
-    }
-    public IEnumerator delaySwitching(int change)
-    {
-        yield return new WaitForSecondsRealtime(.35f);
-        yield return StartCoroutine(doTheSwitch(change));
     }
 
-    public IEnumerator doTheSwitch(int change)
-    {
-        SwitchTargetIndex(change);
-        yield return new WaitForSecondsRealtime(.15f);
-    }
 
     public void SwitchTargetIndex(int change)
     {
@@ -250,9 +240,23 @@ public class lockOnController : MonoBehaviour
                 lockOnTarget = possibleTargets[currentTarget].lockOnPosition;
                 lockOnCamera.Follow = transform;
                 lockOnCamera.LookAt = lockOnTarget;
-                //lockOnCamera.enabled = true;
+                StartCoroutine(LerpTransforms(lockOnCamera.transform, lockOnTarget, targetSwitchSpeed));
             }
         }
+    }
+
+    private IEnumerator LerpTransforms(Transform start, Transform end, float duration)
+    {
+        float timeElapsed = 0f;
+        Quaternion startRot = start.rotation;
+        while (timeElapsed < duration)
+        {
+            timeElapsed += Time.deltaTime;
+            float t = timeElapsed / duration;
+            start.rotation = Quaternion.Slerp(startRot, end.rotation, t);
+            yield return null;
+        }
+        start.rotation = end.rotation;
     }
 
     public void ToggleShoulder()
@@ -260,31 +264,27 @@ public class lockOnController : MonoBehaviour
         leftShoulder = !leftShoulder;
     }
 
-    //public void SwitchCameraShoulder()
-    //{
-    //    CinemachineTransposer transposer;
-    //    if (isLockedOn && leftShoulder)
-    //    {
-    //        //playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPosition.position, lockedOnCameraPositionInverse.position, turnSpeed);
-    //        transposer = lockOnCamera.GetCinemachineComponent<CinemachineTransposer>();
-    //        transposer.m_FollowOffset = transposer.EffectiveOffset;
-    //        transposer.m_FollowOffset = new Vector3(transposer.m_FollowOffset.x * -1, transposer.m_FollowOffset.y, transposer.m_FollowOffset.z);
-    //    }
-    //    else
-    //    {
-    //        //playerCamera.transform.position = Vector3.Slerp(lockedOnCameraPositionInverse.position, lockedOnCameraPosition.position, turnSpeed);
-    //        transposer = lockOnCamera.GetCinemachineComponent<CinemachineTransposer>();
-    //        transposer.m_FollowOffset = transposer.EffectiveOffset;
-    //        transposer.m_FollowOffset = new Vector3(transposer.m_FollowOffset.x * -1, transposer.m_FollowOffset.y, transposer.m_FollowOffset.z);
-    //    }
-
-    //}
+    public void SwitchCameraShoulder()
+    {
+        Cinemachine3rdPersonFollow body;
+        if (isLockedOn && leftShoulder)
+        {
+            body = lockOnCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+            body.CameraSide = Mathf.Lerp(body.CameraSide, 1, Time.deltaTime * shoulderSwitchSpeed);
+        }
+        else
+        {
+            body = lockOnCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+            body.CameraSide = Mathf.Lerp(body.CameraSide, 0, Time.deltaTime * shoulderSwitchSpeed);
+        }
+    }
 
     public void ResetLockOn()
     {
         lockOnTarget = null;
         possibleTargets.Clear();
         currentTarget = 0;
+        targetGroup.m_Targets = new CinemachineTargetGroup.Target[0];
 
         if (lockOnCamera != null)
         {
@@ -293,6 +293,5 @@ public class lockOnController : MonoBehaviour
         cameraLookController.freeLookCamera.Priority = 10;
 
     }
-
 
 }
