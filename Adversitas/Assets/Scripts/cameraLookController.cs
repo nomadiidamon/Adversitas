@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,7 @@ public class cameraLookController : MonoBehaviour, ILook
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
+    [SerializeField] public CinemachineFreeLook freeLookCamera; // Change to CinemachineVirtualCamera
     [SerializeField] public Transform centerOfMass;
     [SerializeField] public Transform defaultCameraPosition;
 
@@ -16,6 +18,8 @@ public class cameraLookController : MonoBehaviour, ILook
     [Range(0, 15)][SerializeField] public float height = 2f;
     [Range(0, 200)][SerializeField] public float pitchLimit = 80f;
     [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
+    [Range(0, 25)][SerializeField] public float cameraFollowSpeed = 2f;
+
 
     private Vector2 lookInput;
     private float currentYaw;
@@ -29,7 +33,7 @@ public class cameraLookController : MonoBehaviour, ILook
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
 
         lockOnController = GetComponentInParent<lockOnController>();
-        playerCamera.transform.position = defaultCameraPosition.position;
+        freeLookCamera.transform.position = defaultCameraPosition.position;
     }
 
     void Update()
@@ -42,13 +46,12 @@ public class cameraLookController : MonoBehaviour, ILook
         {
             lockOnController.UpdateCombatCamera();
         }
-        Debug.DrawRay(playerCamera.transform.position, playerCamera.transform.forward *50, Color.green);
     }
 
     public void Look()
     {
         RotateCamera();
-        UpdateNormalCamera();
+        UpdateVirtualCamera();
     }
 
     void RotateCamera()
@@ -58,15 +61,22 @@ public class cameraLookController : MonoBehaviour, ILook
         currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
     }
 
-    public void UpdateNormalCamera()
+    public void UpdateVirtualCamera()
     {
-        playerCamera.transform.position = defaultCameraPosition.position;
-        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
-        Vector3 offset = rotation * new Vector3(0, 0, -distanceFromPlayer) + new Vector3(0, height, 0);
-        playerCamera.transform.position = transform.position + offset;
-        playerCamera.transform.LookAt(transform.position + Vector3.up * height);
-    }    
+        if (!freeLookCamera.enabled)
+        {
+            freeLookCamera.enabled = true;
+        }
 
+        CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
+        if (brain != null && freeLookCamera != null)
+        {
+            freeLookCamera.Priority = 10; // Set a high priority to enable this camera
+        }
+        Quaternion rotation = Quaternion.Euler(0, currentYaw, 0);
+        freeLookCamera.transform.rotation = rotation;
+        freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
 
+    }
 
 }
