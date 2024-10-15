@@ -24,6 +24,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
 
     [Header("-----Attributes-----")]
+    [Range(0, 20)][SerializeField] float rotationSpeed;
     [Range(0, 20)][SerializeField] float speed;
     [Range(0, 5)][SerializeField] float sprintMod;
     [Range(0, 5)][SerializeField] int jumpMax;
@@ -81,7 +82,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
     public void Move()
     {
-
+        /// original
         Vector3 cameraForward = lookController.playerCamera.transform.forward;
         cameraForward.y = 0;
         cameraForward.Normalize();
@@ -90,7 +91,6 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         right.y = 0;
         right.Normalize();
 
-        // Combine movement input with camera's forward and right vectors
         Vector3 movement = (cameraForward * moveInput.y + right * moveInput.x).normalized;
 
         float currentSpeed = speed;
@@ -113,9 +113,9 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         }
 
         transform.position += movement * currentSpeed * Time.deltaTime;
-        
 
-        
+
+
 
         animator.SetFloat("VelocityX", moveInput.x);
         animator.SetFloat("VelocityY", moveInput.y);
@@ -128,6 +128,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
         }
         Physics.SyncTransforms();
+
     }
 
 

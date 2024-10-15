@@ -8,7 +8,7 @@ public class cameraLookController : MonoBehaviour, ILook
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
-    [SerializeField] public CinemachineFreeLook freeLookCamera; // Change to CinemachineVirtualCamera
+    [SerializeField] public CinemachineFreeLook freeLookCamera;
     [SerializeField] public Transform centerOfMass;
     [SerializeField] public Transform defaultCameraPosition;
 
@@ -18,7 +18,6 @@ public class cameraLookController : MonoBehaviour, ILook
     [Range(0, 15)][SerializeField] public float height = 2f;
     [Range(0, 200)][SerializeField] public float pitchLimit = 80f;
     [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
-    [Range(0, 25)][SerializeField] public float cameraFollowSpeed = 2f;
 
 
     private Vector2 lookInput;
@@ -71,12 +70,16 @@ public class cameraLookController : MonoBehaviour, ILook
         CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
         if (brain != null && freeLookCamera != null)
         {
-            freeLookCamera.Priority = 10; // Set a high priority to enable this camera
+            freeLookCamera.Priority = 10;
         }
-        Quaternion rotation = Quaternion.Euler(0, currentYaw, 0);
+        //Quaternion rotation = Quaternion.Euler(0, currentYaw, 0);
+        //freeLookCamera.transform.rotation = rotation;
+        //freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
+
+        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
         freeLookCamera.transform.rotation = rotation;
         freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
-
+    
     }
 
 }
