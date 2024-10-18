@@ -11,6 +11,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     [SerializeField] PlayerInput playerInput;
     [SerializeField] Rigidbody rb;
     [SerializeField] Animator animator;
+    [SerializeField] Transform cameraFollowTarget;
 
     [Header("-----Ground Detection-----")]
     [SerializeField] BoxCollider leftFoot;
@@ -21,6 +22,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     //[SerializeField] cameraCollisionController collisionController;
     [SerializeField] cameraLookController lookController;
     [SerializeField] lockOnController lockedOnController;
+    [SerializeField] aimController aimController;
 
 
     [Header("-----Attributes-----")]
@@ -122,11 +124,31 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
 
 
-        if (transform.rotation != lookController.playerCamera.transform.rotation)
+        if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
         {
             Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
         }
+        if (transform.rotation != lookController.playerCamera.transform.rotation && aimController.isAiming)
+        {
+            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * aimController.aimSpeed);
+        }
+        else
+        {
+            if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
+            {
+                Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+                cameraFollowTarget.rotation = Quaternion.Slerp(cameraFollowTarget.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
+            }
+            if (transform.rotation != cameraFollowTarget.rotation)
+            {
+                Quaternion targetRotation = Quaternion.Euler(0, cameraFollowTarget.eulerAngles.y, 0);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            }
+        }
+
+
         Physics.SyncTransforms();
 
     }

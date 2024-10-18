@@ -8,6 +8,7 @@ TagManager:
   - Environment
   - Enemy
   - Boss
+  - UI
   layers:
   - Default
   - TransparentFX

@@ -20,11 +20,11 @@ public class cameraLookController : MonoBehaviour, ILook
     [Range(0, 25)][SerializeField] public float turnSpeed = 2f;
 
 
-    private Vector2 lookInput;
+    public Vector2 lookInput;
     private float currentYaw;
     private float currentPitch;
     private lockOnController lockOnController;
-
+    private aimController aimController;
 
     void Awake()
     {
@@ -32,6 +32,8 @@ public class cameraLookController : MonoBehaviour, ILook
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
 
         lockOnController = GetComponentInParent<lockOnController>();
+        aimController = GetComponentInParent<aimController>();
+
         freeLookCamera.transform.position = defaultCameraPosition.position;
     }
 

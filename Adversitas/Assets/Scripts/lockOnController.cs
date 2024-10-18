@@ -20,12 +20,15 @@ public class lockOnController : MonoBehaviour
     [SerializeField] public float targetWeight;
     [SerializeField] public float targetRadius;
     [SerializeField] public float shoulderSwitchSpeed;
+    [SerializeField] public float playerTurnSpeed;
+
 
     [Header("-----LockOn-----")]
     public Transform lockOnTarget;
     public bool isLockedOn = false;
     public bool leftShoulder = false;
 
+    private aimController aimController;
     private cameraLookController cameraLookController;
     private float targetLockTime = 0f;
     private const float targetLockThreshold = 0.25f;
@@ -41,15 +44,22 @@ public class lockOnController : MonoBehaviour
         playerInput.actions["SwitchTarget"].performed += ctx => targetSwitchInput = ctx.ReadValue<Vector2>();
         playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
         cameraLookController = GetComponentInParent<cameraLookController>();
+        aimController = GetComponentInParent<aimController>();
+
+        //if (targetGroup == null)
+        //{
+        //    targetGroup = FindObjectOfType<CinemachineTargetGroup>();
+        //    if (targetGroup == null)
+        //    {
+        //        targetGroup = new GameObject("TargetGroup").AddComponent<CinemachineTargetGroup>();
+        //    }
+        //}
 
         if (targetGroup == null)
         {
-            targetGroup = FindObjectOfType<CinemachineTargetGroup>();
-            if (targetGroup == null)
-            {
-                targetGroup = new GameObject("TargetGroup").AddComponent<CinemachineTargetGroup>();
-            }
+            targetGroup = new GameObject("LockOnTargetGroup").AddComponent<CinemachineTargetGroup>();
         }
+        
     }
 
     private void Update()
@@ -65,6 +75,11 @@ public class lockOnController : MonoBehaviour
 
     public void ToggleLockOn()
     {
+        if (aimController.isAiming)
+        {
+            return;
+        }
+
         isLockedOn = !isLockedOn;
         Debug.Log("Locked on = " + isLockedOn);
 
@@ -72,8 +87,8 @@ public class lockOnController : MonoBehaviour
 
         if (isLockedOn)
         {
-            targetGroup.AddMember(transform, .35f, 10);
-            targetGroup.m_PositionMode = CinemachineTargetGroup.PositionMode.GroupAverage;
+            targetGroup.AddMember(transform, .5f, 10);
+            targetGroup.m_PositionMode = CinemachineTargetGroup.PositionMode.GroupCenter;
             targetGroup.m_RotationMode = CinemachineTargetGroup.RotationMode.GroupAverage;
             targetGroup.m_UpdateMethod = CinemachineTargetGroup.UpdateMethod.FixedUpdate;
 
@@ -84,7 +99,9 @@ public class lockOnController : MonoBehaviour
             if (lockOnCamera != null && brain != null)
             {
                 brain.ActiveVirtualCamera.Priority = 10;
-                lockOnCamera.LookAt = targetGroup.transform;
+                //lockOnCamera.LookAt = targetGroup.transform;
+                lockOnCamera.LookAt = lockOnTarget;
+
             }
         }
         else
