@@ -63,7 +63,7 @@ public class aimController : MonoBehaviour
 
         if (isAiming)
         {
-            SwitchCameraShoulder();
+            //SwitchCameraShoulder();
         }
         else
         {
@@ -84,6 +84,7 @@ public class aimController : MonoBehaviour
             brain.ActiveVirtualCamera.Priority = 0;
             aimCamera.Priority = 10;
             UpdateAim();
+            Debug.DrawLine(aimCamera.transform.position, aimCamera.transform.forward * aimDistance, Color.blue);
         }
     }
 
@@ -189,32 +190,32 @@ public class aimController : MonoBehaviour
         }
     }
 
-    public void SwitchCameraShoulder()
-    {
-        if (isAiming)
-        {
-            Cinemachine3rdPersonFollow body;
-            if (leftShoulder)
-            {
-                body = aimCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
-                body.CameraSide = Mathf.Lerp(body.CameraSide, 0, Time.deltaTime * shoulderSwitchSpeed);
-                aimTarget.position = aimCamera.transform.forward * aimDistance;
-                aimCamera.LookAt = aimTarget;
+    //public void SwitchCameraShoulder()
+    //{
+    //    if (isAiming)
+    //    {
+    //        Cinemachine3rdPersonFollow body;
+    //        if (leftShoulder)
+    //        {
+    //            body = aimCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+    //            body.CameraSide = Mathf.Lerp(body.CameraSide, 0, Time.deltaTime * shoulderSwitchSpeed);
+    //            aimTarget.position = aimCamera.transform.forward * aimDistance;
+    //            aimCamera.LookAt = aimTarget;
 
-            }
-            else
-            {
-                body = aimCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
-                body.CameraSide = Mathf.Lerp(body.CameraSide, 1, Time.deltaTime * shoulderSwitchSpeed);
-                aimTarget.position = aimCamera.transform.forward * aimDistance;
-                aimCamera.LookAt = aimTarget;
-            }
-        }
-        else
-        {
-            aimImage.enabled = false;
-        }
-    }
+    //        }
+    //        else
+    //        {
+    //            body = aimCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
+    //            body.CameraSide = Mathf.Lerp(body.CameraSide, 1, Time.deltaTime * shoulderSwitchSpeed);
+    //            aimTarget.position = aimCamera.transform.forward * aimDistance;
+    //            aimCamera.LookAt = aimTarget;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        aimImage.enabled = false;
+    //    }
+    //}
 
     //public void AdjustRotationSpeed()
     //{

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem.Interactions;
 
 
 
-public class movementController: MonoBehaviour, IMove, IJump, IDodge
+public class movementController : MonoBehaviour, IMove, IJump, IDodge
 {
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
@@ -37,10 +37,14 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     [Range(150, 300)][SerializeField] float dodgeSpeed;
     [Range(0, 20)][SerializeField] float dodgeDuration;
     [Range(0, 5)][SerializeField] float hardFallTime;
+    [Range(0, 5)][SerializeField] float idleStartTime;
+
 
 
     private Stopwatch dodgeStopwatch;
     private Stopwatch fallStopwatch;
+    private Stopwatch idleStopwatch;
+
 
     private FootRaycast leftFootRaycast;
     private FootRaycast rightFootRaycast;
@@ -49,6 +53,8 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
     public bool isJumping = false;
     public bool isSprinting = false;
     public bool isDodging = false;
+    public bool rotateWithCamera = false;
+    public bool isIdle = false;
 
     private Vector2 moveInput;
     private Vector3 verticleVelocity;
@@ -66,6 +72,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
         playerInput.actions["Dodge"].performed += ctx => OnDodgeInput(ctx);
         dodgeStopwatch = new Stopwatch();
         fallStopwatch = new Stopwatch();
+        idleStopwatch = new Stopwatch();
         leftFootRaycast = leftFoot.GetComponent<FootRaycast>();
         rightFootRaycast = rightFoot.GetComponent<FootRaycast>();
         leftFootRaycast.rayLength = footRayLength;
@@ -97,6 +104,10 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
         float currentSpeed = speed;
 
+        // To determine idle state
+        CheckForMovement();
+        // To determien idle state
+
         if (isSprinting)
         {
             currentSpeed *= sprintMod;
@@ -116,25 +127,47 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
         transform.position += movement * currentSpeed * Time.deltaTime;
 
-
-
-
         animator.SetFloat("VelocityX", moveInput.x);
         animator.SetFloat("VelocityY", moveInput.y);
 
 
+        RotateAccordingly();
 
-        if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
+        Physics.SyncTransforms();
+    }
+    public void CheckForMovement()
+    {
+        if (idleStopwatch.IsRunning)
         {
-            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
+            if (moveInput != Vector2.zero)
+            {
+                idleStopwatch.Stop();
+                idleStopwatch.Reset();
+                isIdle = false;
+                rotateWithCamera = true;
+            }
+            else if ((float)idleStopwatch.ElapsedMilliseconds > idleStartTime)
+            {
+                isIdle = true;
+                rotateWithCamera = false;
+            }
+
         }
-        if (transform.rotation != lookController.playerCamera.transform.rotation && aimController.isAiming)
+        else if (!idleStopwatch.IsRunning)
         {
-            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * aimController.aimSpeed);
+            if (moveInput == Vector2.zero)
+            {
+                idleStopwatch.Start();
+            }
         }
-        else
+    }
+
+    public void RotateAccordingly()
+    {
+        RotateForLockedOn();
+        RotateForAiming();
+
+        if (rotateWithCamera)
         {
             if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
             {
@@ -144,15 +177,32 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
             if (transform.rotation != cameraFollowTarget.rotation)
             {
                 Quaternion targetRotation = Quaternion.Euler(0, cameraFollowTarget.eulerAngles.y, 0);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);//* rotationSpeed);
             }
+
         }
-
-
-        Physics.SyncTransforms();
 
     }
 
+    public void RotateForLockedOn()
+    {
+        if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
+        {
+            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
+        }
+    }
+
+    public void RotateForAiming()
+    {
+        if (transform.rotation != aimController.playerCamera.transform.rotation && aimController.isAiming)
+        {
+            UnityEngine.Debug.Log("adjusting Rotation");
+            //Quaternion targetRotation = Quaternion.Euler(0, aimController.playerCamera.transform.eulerAngles.y, 0);
+            //transform.rotation = Quaternion.Slerp(transform.rotation, aimController.aimCamera.transform.rotation, Time.deltaTime * aimController.aimSpeed * speed);
+            transform.forward = aimController.aimCamera.transform.forward;
+        }
+    }
 
     /// Check to see if player is on a solid surface - refer to FootRaycast for details
     public bool isGrounded()
@@ -190,8 +240,6 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
             return false;
         }
     }
-
-
 
 
 
@@ -352,7 +400,7 @@ public class movementController: MonoBehaviour, IMove, IJump, IDodge
 
         Rigidbody rb = GetComponent<Rigidbody>();
 
-        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse); 
+        rb.AddForce(dodgeDirection * (dodgeSpeed), ForceMode.Impulse);
     }
     public void RemoveDodgeForce()
     {
