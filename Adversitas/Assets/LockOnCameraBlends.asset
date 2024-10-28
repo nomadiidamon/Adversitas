@@ -38,7 +38,7 @@ MonoBehaviour:
   - m_From: Aim Camera
     m_To: '**ANY CAMERA**'
     m_Blend:
-      m_Style: 2
+      m_Style: 1
       m_Time: 0.25
       m_CustomCurve:
         serializedVersion: 2

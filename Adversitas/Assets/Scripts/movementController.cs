@@ -164,9 +164,8 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
 
     public void RotateAccordingly()
     {
+        
         RotateForLockedOn();
-        RotateForAiming();
-
         if (rotateWithCamera)
         {
             if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
@@ -181,6 +180,8 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
             }
 
         }
+        RotateForAiming();
+
 
     }
 
@@ -195,13 +196,20 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
 
     public void RotateForAiming()
     {
-        if (transform.rotation != aimController.playerCamera.transform.rotation && aimController.isAiming)
-        {
-            UnityEngine.Debug.Log("adjusting Rotation");
-            //Quaternion targetRotation = Quaternion.Euler(0, aimController.playerCamera.transform.eulerAngles.y, 0);
-            //transform.rotation = Quaternion.Slerp(transform.rotation, aimController.aimCamera.transform.rotation, Time.deltaTime * aimController.aimSpeed * speed);
-            transform.forward = aimController.aimCamera.transform.forward;
-        }
+        //if (transform.rotation != aimController.aimCamera.transform.rotation && aimController.isAiming)
+        //{
+        //    UnityEngine.Debug.Log("adjusting Rotation");
+        //    if (isIdle)
+        //    {
+        //        UnityEngine.Debug.Log("aiming while idle");
+                
+        //        Quaternion newRotation = 
+
+        //    }
+
+
+        //}
+
     }
 
     /// Check to see if player is on a solid surface - refer to FootRaycast for details

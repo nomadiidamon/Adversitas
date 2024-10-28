@@ -43,7 +43,7 @@ public class aimController : MonoBehaviour
         playerInput.actions["Aim"].canceled += ctx => OnReleaseButton(ctx);
         playerInput.actions["Look"].performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         playerInput.actions["Look"].canceled += ctx => lookInput = Vector2.zero;
-        playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
+        //playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
 
         lockOnController = GetComponentInParent<lockOnController>();
         cameraLookController = GetComponentInParent<cameraLookController>();
@@ -69,6 +69,8 @@ public class aimController : MonoBehaviour
         {
             aimImage.enabled = false;
         }
+        Debug.DrawLine(aimCamera.transform.position, aimCamera.transform.forward * aimDistance, Color.blue);
+        Debug.DrawLine(headPos.position, aimCamera.transform.forward *aimDistance, Color.green);
     }
 
     private void OnHoldButton(InputAction.CallbackContext context)
@@ -99,17 +101,17 @@ public class aimController : MonoBehaviour
     public void UpdateAimTargetPosition()
     {
         RotateCamera();
-        UpdateAimPOV();
+        //UpdateAimPOV();
         if (lookInput == Vector2.zero)
         {
             aimPov.m_VerticalAxis.Value = 0;
             aimPov.m_HorizontalAxis.Value = 0;
         }
-        else
-        {
-            aimPov.m_VerticalAxis.Value = lookInput.y;
-            aimPov.m_HorizontalAxis.Value = lookInput.x;
-        }
+        //else
+        //{
+        //    aimPov.m_VerticalAxis.Value = lookInput.y;
+        //    aimPov.m_HorizontalAxis.Value = lookInput.x;
+        //}
 
         if (!aimImage.enabled)
         {
@@ -132,37 +134,30 @@ public class aimController : MonoBehaviour
         }
     }
 
-    private void UpdateAimPOV()
-    {
-        if (lookInput == Vector2.zero)
-        {
-            aimPov.m_VerticalAxis.Value = 0;
-            aimPov.m_HorizontalAxis.Value = 0;
-        }
-        else
-        {
-            aimPov.m_VerticalAxis.Value = Mathf.Lerp(aimPov.m_VerticalAxis.Value, lookInput.y, Time.deltaTime * aimSpeed);
-            aimPov.m_HorizontalAxis.Value = Mathf.Lerp(aimPov.m_HorizontalAxis.Value, lookInput.x, Time.deltaTime * aimSpeed);
-        }
-    }
+    //private void UpdateAimPOV()
+    //{
+    //    if (lookInput == Vector2.zero)
+    //    {
+    //        aimPov.m_VerticalAxis.Value = 0;
+    //        aimPov.m_HorizontalAxis.Value = 0;
+    //    }
+    //    else
+    //    {
+    //        //aimPov.m_VerticalAxis.Value = Mathf.Lerp(aimPov.m_VerticalAxis.Value, lookInput.y, Time.deltaTime * aimSpeed);
+    //        //aimPov.m_HorizontalAxis.Value = Mathf.Lerp(aimPov.m_HorizontalAxis.Value, lookInput.x, Time.deltaTime * aimSpeed);
+    //    }
+    //}
 
     void RotateCamera()
     {
-        //currentYaw += lookInput.x * aimSpeed;
-        //currentPitch -= lookInput.y * aimSpeed;
-        ////currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
+        currentYaw += lookInput.x * aimSpeed;
+        currentPitch -= lookInput.y * aimSpeed;
+        currentPitch = Mathf.Clamp(currentPitch, -pitchLimit, pitchLimit);
 
-        //Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
-        //aimCamera.transform.rotation = rotation;
-        //aimCamera.transform.position = (centerOfMass.position + rotation *new Vector3(0,0,0));
-
-
-        currentYaw = Mathf.Clamp(currentYaw + lookInput.x * aimSpeed, -360, 360);
-        currentPitch = Mathf.Clamp(currentPitch - lookInput.y * aimSpeed, -pitchLimit, pitchLimit);
-
-        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
+        Quaternion rotation = Quaternion.Euler(currentYaw, currentPitch, 0);
         aimCamera.transform.rotation = rotation;
-        aimCamera.transform.position = centerOfMass.position; // Simplified, you can adjust as needed.
+        aimCamera.transform.position = (centerOfMass.position + rotation * new Vector3(0, 0, 0));
+
     }
 
     private void OnReleaseButton(InputAction.CallbackContext context)
@@ -182,13 +177,13 @@ public class aimController : MonoBehaviour
         aimImage.enabled = false;
     }
 
-    public void ToggleShoulder()
-    {
-        if (isAiming)
-        {
-            leftShoulder = !leftShoulder;
-        }
-    }
+    //public void ToggleShoulder()
+    //{
+    //    if (isAiming)
+    //    {
+    //        leftShoulder = !leftShoulder;
+    //    }
+    //}
 
     //public void SwitchCameraShoulder()
     //{
