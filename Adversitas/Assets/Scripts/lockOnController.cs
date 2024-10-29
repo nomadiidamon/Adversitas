@@ -307,7 +307,7 @@ public class lockOnController : MonoBehaviour
         {
             lockOnCamera.Priority = 0;
         }
-        cameraLookController.freeLookCamera.Priority = 10;
+        cameraLookController.lookCamera.Priority = 10;
 
     }
 

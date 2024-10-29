@@ -8,7 +8,8 @@ public class cameraLookController : MonoBehaviour, ILook
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
-    [SerializeField] public CinemachineFreeLook freeLookCamera;
+    //[SerializeField] public CinemachineFreeLook freeLookCamera;
+    [SerializeField] public CinemachineVirtualCamera lookCamera;
     [SerializeField] public Transform centerOfMass;
     [SerializeField] public Transform defaultCameraPosition;
 
@@ -25,6 +26,9 @@ public class cameraLookController : MonoBehaviour, ILook
     private float currentPitch;
     private lockOnController lockOnController;
     private aimController aimController;
+    private movementController movementController;
+    public bool isLooking = false;
+
 
     void Awake()
     {
@@ -34,25 +38,26 @@ public class cameraLookController : MonoBehaviour, ILook
         lockOnController = GetComponentInParent<lockOnController>();
         aimController = GetComponentInParent<aimController>();
 
-        freeLookCamera.transform.position = defaultCameraPosition.position;
+        lookCamera.transform.position = defaultCameraPosition.position;
+        movementController = GetComponentInParent<movementController>();
     }
 
     void Update()
     {
-        if (!lockOnController.isLockedOn)
+        if (!isLooking)
         {
+
             Look();
-        }
-        else
-        {
-            lockOnController.UpdateCombatCamera();
+
         }
     }
 
     public void Look()
     {
+        isLooking = true;
         RotateCamera();
         UpdateVirtualCamera();
+        isLooking = false;
     }
 
     void RotateCamera()
@@ -64,24 +69,35 @@ public class cameraLookController : MonoBehaviour, ILook
 
     public void UpdateVirtualCamera()
     {
-        if (!freeLookCamera.enabled)
+        if (!lookCamera.enabled)
         {
-            freeLookCamera.enabled = true;
+            lookCamera.enabled = true;
         }
 
-        CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
-        if (brain != null && freeLookCamera != null)
-        {
-            freeLookCamera.Priority = 10;
-        }
+        //CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
+        //if (brain != null && lookCamera != null)
+        //{
+        //    freeLookCamera.Priority = 10;
+        //}
         //Quaternion rotation = Quaternion.Euler(0, currentYaw, 0);
         //freeLookCamera.transform.rotation = rotation;
         //freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
 
-        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
-        freeLookCamera.transform.rotation = rotation;
-        freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
-    
+        Quaternion rotation = Quaternion.Euler(currentYaw, currentPitch, 0);
+        lookCamera.transform.rotation = rotation;
+        //lookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
+        lookCamera.transform.up = centerOfMass.up;
+        if (movementController.isIdle)
+        {
+            lookCamera.LookAt = lookCamera.Follow;
+
+        }
+        else
+        {
+            transform.rotation = rotation;
+        }
+
     }
 
+    
 }

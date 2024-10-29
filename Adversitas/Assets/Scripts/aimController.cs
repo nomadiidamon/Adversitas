@@ -167,7 +167,7 @@ public class aimController : MonoBehaviour
             isAiming = false;
             CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
             brain.ActiveVirtualCamera.Priority = 0;
-            cameraLookController.freeLookCamera.Priority = 10;
+            cameraLookController.lookCamera.Priority = 10;
             ResetAim();
         }
     }

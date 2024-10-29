@@ -95,24 +95,19 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
         Vector3 cameraForward = lookController.playerCamera.transform.forward;
         cameraForward.y = 0;
         cameraForward.Normalize();
-
         Vector3 right = lookController.playerCamera.transform.right;
         right.y = 0;
         right.Normalize();
-
         Vector3 movement = (cameraForward * moveInput.y + right * moveInput.x).normalized;
-
         float currentSpeed = speed;
 
         // To determine idle state
         CheckForMovement();
-        // To determien idle state
 
         if (isSprinting)
         {
             currentSpeed *= sprintMod;
             animator.SetTrigger("IsSprinting");
-
             if (moveInput.y == 0 && moveInput.x == 0)
             {
                 isSprinting = false;
@@ -131,7 +126,7 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
         animator.SetFloat("VelocityY", moveInput.y);
 
 
-        RotateAccordingly();
+        //RotateAccordingly();
 
         Physics.SyncTransforms();
     }
@@ -162,55 +157,55 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
         }
     }
 
-    public void RotateAccordingly()
-    {
+    //public void RotateAccordingly()
+    //{
         
-        RotateForLockedOn();
-        if (rotateWithCamera)
-        {
-            if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
-            {
-                Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-                cameraFollowTarget.rotation = Quaternion.Slerp(cameraFollowTarget.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
-            }
-            if (transform.rotation != cameraFollowTarget.rotation)
-            {
-                Quaternion targetRotation = Quaternion.Euler(0, cameraFollowTarget.eulerAngles.y, 0);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);//* rotationSpeed);
-            }
+    //    RotateForLockedOn();
+    //    //if (rotateWithCamera)
+    //    //{
+    //    //    if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
+    //    //    {
+    //    //        Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+    //    //        cameraFollowTarget.rotation = Quaternion.Slerp(cameraFollowTarget.rotation, targetRotation, Time.deltaTime * lookController.turnSpeed);
+    //    //    }
+    //    //    if (transform.rotation != cameraFollowTarget.rotation)
+    //    //    {
+    //    //        Quaternion targetRotation = Quaternion.Euler(0, cameraFollowTarget.eulerAngles.y, 0);
+    //    //        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);//* rotationSpeed);
+    //    //    }
 
-        }
-        RotateForAiming();
+    //    //}
+    //    //RotateForAiming();
 
 
-    }
+    //}
 
-    public void RotateForLockedOn()
-    {
-        if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
-        {
-            Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
-        }
-    }
+    //public void RotateForLockedOn()
+    //{
+    //    //if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
+    //    //{
+    //    //    Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
+    //    //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
+    //    //}
+    //}
 
-    public void RotateForAiming()
-    {
-        //if (transform.rotation != aimController.aimCamera.transform.rotation && aimController.isAiming)
-        //{
-        //    UnityEngine.Debug.Log("adjusting Rotation");
-        //    if (isIdle)
-        //    {
-        //        UnityEngine.Debug.Log("aiming while idle");
+    //public void RotateForAiming()
+    //{
+    //    //if (transform.rotation != aimController.aimCamera.transform.rotation && aimController.isAiming)
+    //    //{
+    //    //    UnityEngine.Debug.Log("adjusting Rotation");
+    //    //    if (isIdle)
+    //    //    {
+    //    //        UnityEngine.Debug.Log("aiming while idle");
                 
-        //        Quaternion newRotation = 
+    //    //        Quaternion newRotation = 
 
-        //    }
+    //    //    }
 
 
-        //}
+    //    //}
 
-    }
+    //}
 
     /// Check to see if player is on a solid surface - refer to FootRaycast for details
     public bool isGrounded()
