@@ -2,7 +2,7 @@
 
 public class Level
 {
-    public int m_Level { get; set; }
+    public int m_myLevel { get; set; }
 
     public int m_currExperience { get; set; }
     public int m_expToNextLevel { get; set; }

@@ -2,9 +2,8 @@
 
 public class Stat
 {
-
-	string m_name {  get; set; }
-	Level m_level { get; set; }
+	public string m_name {  get; set; }
+	public Level m_level { get; set; }
 
     int firstLimitValue { get; set; }
     int secondLimitValue{ get; set; }
@@ -14,7 +13,7 @@ public class Stat
     public Stat(string name, int level)
 	{
         m_name = name;
-        m_level.m_Level = level;
+        m_level.m_myLevel = level;
 	}
 
 

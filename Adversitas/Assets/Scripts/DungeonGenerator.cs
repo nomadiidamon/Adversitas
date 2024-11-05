@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-enum Shapes = { CAPSULE, SPHERE, CUBE, RECTANGLE, PRISM, CYLINDER, CEILING, DOME, TUNNEL, }
+enum Shapes { CAPSULE, SPHERE, CUBE, RECTANGLE, PRISM, CYLINDER, CEILING, DOME, TUNNEL, }
 
 
 public class Space
@@ -17,14 +18,14 @@ public class Space
 public class Chunk
 {
 	Space m_space;
-	Vector<Space> sections;
+	List<Space> sections;
 }
 
 public class Room
 {
 	Space m_space;
 	Shapes roomShape;
-	Vector<Chunk> 
+	List<Chunk> chunks;
 	float m_roomWidth;
 	float m_roomHeight;
 }
