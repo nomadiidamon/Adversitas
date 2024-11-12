@@ -1,56 +1,78 @@
 ﻿using System;
 
-public interface IStatusEffect()
+public interface IStatusEffect
 {
-    public void ApplyStatusEffect();
+    void ApplyStatusEffect();
+    float effectDuration {  get; set; }
 }
 
 public interface IPositiveStatusEffect : IStatusEffect
 {
-    public void ApplyBuff();
+    void ApplyBuff();
 }
 
 public interface INegativeStatusEffect : IStatusEffect
 {
-    public void ApplyDebuff();
+    void ApplyDebuff();
 }
 
+enum PositiveStatusType { equilibrium, other }// FLowState, gainHealth, gainMana, gainStamina, breakOpponenet, executeOpponent, dodge, other };
+enum NegativeStatus { equilibrium, other }// ToHeat, ToCold, Wet, Shocked, Burdened, Poisoned, Bleeding, stunned, other }
 
 public class PositiveStatus : IPositiveStatusEffect
 {
-    enum PositiveStatus { equilibrium, other }// FLowState, gainHealth, gainMana, gainStamina, breakOpponenet, executeOpponent, dodge, other };
-    public PositiveStatus status;
-    public bool isActive;
+    public PositiveStatusType status {  get; set; }
+    public bool isActive { get; set; }
+    public float effectDuration { get; set; }
     // my function pointer to give an effect to 
+    public StatusEffectDelegate StatusEffectFunction {  get; set; }
 
 
     public void ApplyBuff()
     {
-        SetPositiveStatus();
+        StatusEffectFunction?.invoke();
     }
 
-    public SetPositiveStatus(int statusType = 0)
+    public PositiveStatus(int PositiveStatus posStatus = PositiveStatus.equilibrium, float duration = 1.5f)
     {
         status = statusType;
+        isActive = false;
+        effectDuration = duration;
         // call out function that assigns the function pointer.
         //function pointer do your thing
     }
 
+    public void SetStatusEffectFunction(StatusEffectDelegate func)
+    {
+        StatusEffectFunction = func;
+    }
     // create funtion to assign our function pointer to something other than null
 }
 
-public class NegativeStatus
+public class NegativeStatus : INegativeStatusEffect
 {
-    enum NegativeStatus { equilibrium, other }// ToHeat, ToCold, Wet, Shocked, Burdened, Poisoned, Bleeding, stunned, other }
-    public NegativeStatus status;
-    public bool isActive;
+    public NegativeStatus status {  get; set; }
+    public bool isActive { get; set; }
+    public float effectDuration { get; set; }
 
+    public StatusEffectDelegate StatusEffectFunction { get; set; }
 
-    public SetNegativeStatus(int statusType)
+    public void ApplyDebuff()
     {
-        status = statusType;
+        StatusEffectFunction?.invoke();
     }
 
+    public NegativeStatus(NegativeStatusType statusType = NegativeStatus.equilibrium, float duration = 1.5f)
+    {
+        status = statusType;
+        effectDuration = duration;
+        isActive=false;
+    }
+
+    public void SetStatusEffectFunction(StatusEffectDelegate func)
+    {
+        StatusEffectFunction = func;
+    }
 }
 
 public class Resistances
