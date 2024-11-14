@@ -19,6 +19,8 @@ public class lockOnController : MonoBehaviour
     [Range(0, 150)][SerializeField] public float lockOnDistance = 5f;
     [SerializeField] public float targetWeight;
     [SerializeField] public float targetRadius;
+    [SerializeField] public float playerWeight;
+    [SerializeField] public float playerRadius;
     [SerializeField] public float shoulderSwitchSpeed;
     [SerializeField] public float playerTurnSpeed;
 
@@ -42,18 +44,10 @@ public class lockOnController : MonoBehaviour
     {
         playerInput.actions["LockOn"].performed += ctx => ToggleLockOn();
         playerInput.actions["SwitchTarget"].performed += ctx => targetSwitchInput = ctx.ReadValue<Vector2>();
-        playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
+        //playerInput.actions["SwitchShoulder"].performed += ctx => ToggleShoulder();
         cameraLookController = GetComponentInParent<cameraLookController>();
         aimController = GetComponentInParent<aimController>();
 
-        //if (targetGroup == null)
-        //{
-        //    targetGroup = FindObjectOfType<CinemachineTargetGroup>();
-        //    if (targetGroup == null)
-        //    {
-        //        targetGroup = new GameObject("TargetGroup").AddComponent<CinemachineTargetGroup>();
-        //    }
-        //}
 
         if (targetGroup == null)
         {
@@ -69,7 +63,7 @@ public class lockOnController : MonoBehaviour
         {
             targetLockTime += Time.deltaTime;
             Debug.DrawLine(playerCenterOfMass.position, lockOnTarget.position);
-            SwitchCameraShoulder();
+            //SwitchCameraShoulder();
         }
     }
 
@@ -87,7 +81,7 @@ public class lockOnController : MonoBehaviour
 
         if (isLockedOn)
         {
-            targetGroup.AddMember(transform, .5f, 10);
+            targetGroup.AddMember(transform, playerWeight, playerRadius);
             targetGroup.m_PositionMode = CinemachineTargetGroup.PositionMode.GroupCenter;
             targetGroup.m_RotationMode = CinemachineTargetGroup.RotationMode.GroupAverage;
             targetGroup.m_UpdateMethod = CinemachineTargetGroup.UpdateMethod.FixedUpdate;
@@ -274,26 +268,6 @@ public class lockOnController : MonoBehaviour
             yield return null;
         }
         start.rotation = end.rotation;
-    }
-
-    public void ToggleShoulder()
-    {
-        leftShoulder = !leftShoulder;
-    }
-
-    public void SwitchCameraShoulder()
-    {
-        Cinemachine3rdPersonFollow body;
-        if (isLockedOn && leftShoulder)
-        {
-            body = lockOnCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
-            body.CameraSide = Mathf.Lerp(body.CameraSide, 1, Time.deltaTime * shoulderSwitchSpeed);
-        }
-        else
-        {
-            body = lockOnCamera.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
-            body.CameraSide = Mathf.Lerp(body.CameraSide, 0, Time.deltaTime * shoulderSwitchSpeed);
-        }
     }
 
     public void ResetLockOn()

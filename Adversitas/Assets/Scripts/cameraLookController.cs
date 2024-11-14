@@ -8,10 +8,10 @@ public class cameraLookController : MonoBehaviour, ILook
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
-    //[SerializeField] public CinemachineFreeLook freeLookCamera;
     [SerializeField] public CinemachineVirtualCamera lookCamera;
     [SerializeField] public Transform centerOfMass;
-    [SerializeField] public Transform defaultCameraPosition;
+    [SerializeField] public Transform bodyRotatePoint;
+
 
     [Header("-----Normal Camera Factors-----")]
     [Range(0, 4)][SerializeField] public float lookSpeed = 2f;
@@ -37,19 +37,15 @@ public class cameraLookController : MonoBehaviour, ILook
 
         lockOnController = GetComponentInParent<lockOnController>();
         aimController = GetComponentInParent<aimController>();
-
-        lookCamera.transform.position = defaultCameraPosition.position;
         movementController = GetComponentInParent<movementController>();
     }
 
     void Update()
     {
-        if (!isLooking)
-        {
-
-            Look();
-
-        }
+            if (lockOnController == null || !lockOnController.isLockedOn)
+            {
+                Look();
+            }
     }
 
     public void Look()
@@ -69,35 +65,21 @@ public class cameraLookController : MonoBehaviour, ILook
 
     public void UpdateVirtualCamera()
     {
-        if (!lookCamera.enabled)
+        CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
+        if (brain != null && lookCamera != null && lookCamera.Priority != 10)
         {
-            lookCamera.enabled = true;
+            lookCamera.Priority = 10;
         }
 
-        //CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
-        //if (brain != null && lookCamera != null)
-        //{
-        //    freeLookCamera.Priority = 10;
-        //}
-        //Quaternion rotation = Quaternion.Euler(0, currentYaw, 0);
-        //freeLookCamera.transform.rotation = rotation;
-        //freeLookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
-
-        Quaternion rotation = Quaternion.Euler(currentYaw, currentPitch, 0);
+        Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
         lookCamera.transform.rotation = rotation;
-        //lookCamera.transform.position = centerOfMass.position + rotation * new Vector3(0, height, -distanceFromPlayer);
         lookCamera.transform.up = centerOfMass.up;
-        if (movementController.isIdle)
-        {
-            lookCamera.LookAt = lookCamera.Follow;
 
-        }
-        else
-        {
-            transform.rotation = rotation;
-        }
-
+        bodyRotatePoint.rotation = rotation;
+        transform.rotation = rotation;
     }
 
-    
 }
+
+    
+

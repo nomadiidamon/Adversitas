@@ -126,7 +126,12 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
         animator.SetFloat("VelocityY", moveInput.y);
 
 
-        //RotateAccordingly();
+        // RotateAccordingly();
+        if (lockedOnController.isLockedOn)
+        {
+            RotateForLockedOn();
+
+        }
 
         Physics.SyncTransforms();
     }
@@ -159,8 +164,15 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
 
     //public void RotateAccordingly()
     //{
-        
-    //    RotateForLockedOn();
+
+    //    if (transform.rotation != cameraFollowTarget.rotation)
+    //    {
+    //        Quaternion targetRotation = Quaternion.Euler(0, cameraFollowTarget.eulerAngles.y, 0);
+    //        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);//* rotationSpeed);
+    //    }
+
+        //RotateForLockedOn();
+    //    RotateForLooking();
     //    //if (rotateWithCamera)
     //    //{
     //    //    if (cameraFollowTarget.rotation != lookController.playerCamera.transform.rotation)
@@ -175,37 +187,23 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
     //    //    }
 
     //    //}
-    //    //RotateForAiming();
+    //    RotateForAiming();
 
 
     //}
 
-    //public void RotateForLockedOn()
-    //{
-    //    //if (transform.rotation != lookController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
-    //    //{
-    //    //    Quaternion targetRotation = Quaternion.Euler(0, lookController.playerCamera.transform.eulerAngles.y, 0);
-    //    //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
-    //    //}
-    //}
-
-    //public void RotateForAiming()
-    //{
-    //    //if (transform.rotation != aimController.aimCamera.transform.rotation && aimController.isAiming)
-    //    //{
-    //    //    UnityEngine.Debug.Log("adjusting Rotation");
-    //    //    if (isIdle)
-    //    //    {
-    //    //        UnityEngine.Debug.Log("aiming while idle");
-                
-    //    //        Quaternion newRotation = 
-
-    //    //    }
 
 
-    //    //}
+    public void RotateForLockedOn()
+    {
+        if (transform.rotation != lockedOnController.playerCamera.transform.rotation && lockedOnController.isLockedOn)
+        {
+            Quaternion targetRotation = Quaternion.Euler(0, lockedOnController.playerCamera.transform.eulerAngles.y, 0);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * lockedOnController.playerTurnSpeed);
+        }
+    }
 
-    //}
+
 
     /// Check to see if player is on a solid surface - refer to FootRaycast for details
     public bool isGrounded()

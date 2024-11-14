@@ -13,7 +13,7 @@ public class Stat
     public Stat(string name, int level)
 	{
         m_name = name;
-        m_level.m_myLevel = level;
+        m_level.m_value = level;
 	}
 
 

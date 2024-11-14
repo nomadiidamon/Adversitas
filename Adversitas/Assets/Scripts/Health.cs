@@ -3,7 +3,7 @@
 public class Health
 {
     Factors factors;
-	public Stat stat
+    public Stat stat;
 	public Health(string name, int level, int expToNextLvl, float levelRate)
 	{
         stat.m_name = name;

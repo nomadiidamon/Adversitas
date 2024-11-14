@@ -8,7 +8,7 @@ public class StatRequirement
 	public StatRequirement(Stat stat)
 	{
 		if (stat != null) { 
-			if (stat.m_level.value >= minLevel)
+			if (stat.m_level.m_value >= minLevel)
 			{
 				meetsRequirment = true;
 			}
