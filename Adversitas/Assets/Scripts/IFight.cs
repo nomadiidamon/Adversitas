@@ -2,5 +2,5 @@
 
 public interface IFight
 {
-	public Fight();
+	public void Fight();
 }

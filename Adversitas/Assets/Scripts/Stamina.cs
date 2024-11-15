@@ -14,15 +14,17 @@ public class Stamina
        stat.m_level.m_value = level;
        stat.m_level.m_expToNextLevel = expToNextLvl;
        stat.m_level.m_levelRate = levelRate;
+
+        CalculateInitialStaminaPoints();
     }
 
     private void CalculateInitialStaminaPoints()
     {
-        if (level > 1)
+        if (stat.m_level.m_value > 1)
         {
-            int target = 175 * level;
+            int target = 175 * stat.m_level.m_value;
             currentHealthPoints = target;
-            target = 300 * level;
+            target = 300 * stat.m_level.m_value;
         }
         else
         {

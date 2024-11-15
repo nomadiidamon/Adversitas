@@ -2,5 +2,5 @@
 
 public interface IRetreat
 {
-	public Retreat();
+	public void Retreat();
 }

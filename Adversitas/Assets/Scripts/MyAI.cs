@@ -1,21 +1,27 @@
 ﻿using System;
+using UnityEngine;
 
 public class MyAI
 {
-	Health health;
-	Stamina stamina;
 	public bool isActive {  get; set; }
 	public Transform target { get; set; }
 	public float speed { get; set; }
+	Stamina stamina;
+	Health health;
 	public int damage { get; set;} 
 
+	public MyAI() { 
+		
+	
+	}
 
-	public MyAi(Transform target, float speed, int health, int stamina, int damage)
+
+	public MyAI(Transform target, float speed, int stamina, int health, int damage)
 	{
 		this.target = target;
 		this.speed = speed;
-		this.health.m_level.value = health;
-		this.stamina.m_level.value = stamina;
+		this.health.stat.m_level.m_value = health;
+		this.stamina.stat.m_level.m_value = stamina;
 		this.damage = damage;
 	}
 }

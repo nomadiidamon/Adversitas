@@ -19,11 +19,11 @@ public class Health
 
     private void CalculateInitialHealthPoints()
     {
-        if (level > 1)
+        if (stat.m_level.m_value > 1)
         {
-            int target = 175 * level;
+            int target = 175 * stat.m_level.m_value;
             currentHealthPoints = target;
-            target = 300 * level;
+            target = 300 * stat.m_level.m_value;
         }
         else
         {

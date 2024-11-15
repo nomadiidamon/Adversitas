@@ -59,6 +59,7 @@ public class aimController : MonoBehaviour
         if (isAiming)
         {
             //SwitchCameraShoulder();
+            GetComponentInParent<Animator>().SetBool("IsAiming", isAiming);
         }
         else
         {
@@ -133,6 +134,7 @@ public class aimController : MonoBehaviour
         if (context.canceled)
         {
             isAiming = false;
+            GetComponentInParent<Animator>().SetBool("IsAiming", isAiming);
             CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
             brain.ActiveVirtualCamera.Priority = 0;
             cameraLookController.lookCamera.Priority = 10;

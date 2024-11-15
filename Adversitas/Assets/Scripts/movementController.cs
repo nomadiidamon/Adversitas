@@ -135,6 +135,7 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
 
         Physics.SyncTransforms();
     }
+
     public void CheckForMovement()
     {
         if (idleStopwatch.IsRunning)
@@ -144,11 +145,13 @@ public class movementController : MonoBehaviour, IMove, IJump, IDodge
                 idleStopwatch.Stop();
                 idleStopwatch.Reset();
                 isIdle = false;
+                GetComponentInParent<Animator>().SetBool("IsIdle", isIdle);
                 rotateWithCamera = true;
             }
             else if ((float)idleStopwatch.ElapsedMilliseconds > idleStartTime)
             {
                 isIdle = true;
+                GetComponentInParent<Animator>().SetBool("IsIdle", isIdle);
                 rotateWithCamera = false;
             }
 
