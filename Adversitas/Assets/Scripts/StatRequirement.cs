@@ -5,18 +5,13 @@ public class StatRequirement
 	int minLevel;
 	bool meetsRequirment = false;
 
-	public StatRequirement(Stat stat)
+	public StatRequirement(Stat stat, int minLevel)
 	{
-		if (stat != null) { 
-			if (stat.m_level.m_value >= minLevel)
-			{
-				meetsRequirment = true;
-			}
-			else
-			{
-				meetsRequirment = false;
-			}
+		this.minLevel = minLevel;
 
+		if (stat != null) { 
+
+			meetsRequirment = stat.m_level.m_value >= minLevel;
 		}
 	}
 }

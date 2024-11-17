@@ -37,7 +37,7 @@ public class PositiveStatus : IPositiveStatusEffect
 
     public void ApplyStatusEffect()
     {
-        throw new NotImplementedException();
+        ApplyBuff();
     }
 
     public PositiveStatus(PositiveStatusType statusType = PositiveStatusType.equilibrium, float duration = 1.5f)
@@ -71,7 +71,7 @@ public class NegativeStatus : INegativeStatusEffect
 
     public void ApplyStatusEffect()
     {
-        throw new NotImplementedException();
+        ApplyDebuff();
     }
 
     public NegativeStatus(NegativeStatusType statusType = NegativeStatusType.equilibrium, float duration = 1.5f)
@@ -91,13 +91,32 @@ public class Resistances
 {
     PositiveStatus m_positiveStatus;
     NegativeStatus m_negativeStatus;
-    public Resistances(bool positive, int Key)
+    public Resistances(bool positive, int duration)
     {
         if (positive)
         {
-            //m_positiveStatus.m_positiveStatus.status 
+            m_positiveStatus = new PositiveStatus(PositiveStatusType, duration);
+        }
+        else
+        {
+            m_negativeStatus = new NegativeStatus(NegativeStatusType, duration);
         }
     }
+
+    public void ApplyResistance()
+    {
+        if (m_positiveStatus != null && m_positiveStatus.isActive)
+        {
+            m_positiveStatus.ApplyBuff();
+        }
+
+        if (m_negativeStatus != null && m_negativeStatus.isActive)
+        {
+            m_negativeStatus.ApplyDebuff();
+        }
+
+    }
+
 }
 
 public class Factors

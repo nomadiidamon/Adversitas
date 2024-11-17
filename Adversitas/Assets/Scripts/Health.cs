@@ -1,16 +1,14 @@
 ﻿using System;
 
-public class Health
+public class Health : Stat
 {
     Factors factors;
-    public Stat stat;
     public int currentHealthPoints { get; set; }
     public int maxHealthPoints { get; set; }
 
     public Health(string name, int level, int expToNextLvl, float levelRate)
+        :base(name, level)
 	{
-        stat.m_name = name;
-        stat.m_level.m_value = level;
         stat.m_level.m_expToNextLevel = expToNextLvl;
         stat.m_level.m_levelRate = levelRate;
 
@@ -23,7 +21,7 @@ public class Health
         {
             int target = 175 * stat.m_level.m_value;
             currentHealthPoints = target;
-            target = 300 * stat.m_level.m_value;
+            maxHealthPoints = 300 * stat.m_level.m_value;
         }
         else
         {
