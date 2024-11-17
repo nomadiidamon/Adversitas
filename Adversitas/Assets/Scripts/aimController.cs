@@ -32,6 +32,7 @@ public class aimController : MonoBehaviour
     private lockOnController lockOnController;
     private cameraLookController cameraLookController;
     private movementController moveController;
+    private Animator animator;
 
 
 
@@ -45,6 +46,8 @@ public class aimController : MonoBehaviour
         lockOnController = GetComponentInParent<lockOnController>();
         cameraLookController = GetComponentInParent<cameraLookController>();
         moveController = GetComponentInParent<movementController>();
+
+        animator = GetComponentInParent<Animator>();
 
         uiCanvas = GameObject.FindGameObjectWithTag("UI").GetComponent<Canvas>();
         aimImage = uiCanvas.GetComponentInChildren<Image>();
@@ -78,6 +81,7 @@ public class aimController : MonoBehaviour
                 return;
             }
             isAiming = true;
+            animator.SetLayerWeight(animator.GetLayerIndex("UpperBody"), 1);
             CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
             brain.ActiveVirtualCamera.Priority = 0;
             aimCamera.Priority = 10;
@@ -135,6 +139,7 @@ public class aimController : MonoBehaviour
         {
             isAiming = false;
             GetComponentInParent<Animator>().SetBool("IsAiming", isAiming);
+            animator.SetLayerWeight(animator.GetLayerIndex("UpperBody"), 0);
             CinemachineBrain brain = playerCamera.GetComponent<CinemachineBrain>();
             brain.ActiveVirtualCamera.Priority = 0;
             cameraLookController.lookCamera.Priority = 10;
