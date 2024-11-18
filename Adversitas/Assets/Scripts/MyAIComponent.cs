@@ -1,8 +1,9 @@
 ﻿using System;
+using UnityEngine;
 
-public class MyAIComponent
+public interface IMyAIComponenet
 {
-	public MyAIComponent()
-	{
-	}
+	public void PerformRole();		     
+
+
 }

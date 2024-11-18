@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class MoveToDestinationRigidbody : IMove
+public class MoveToDestinationRigidbody : IMove, IMyAIComponenet
 {
     private Rigidbody objectRigidbody;
     private Vector3 destination;
@@ -11,6 +11,11 @@ public class MoveToDestinationRigidbody : IMove
         this.objectRigidbody = objectRigidbody;
         this.destination = destination;
         this.moveSpeed = moveSpeed;
+    }
+
+    public void PerformRole()
+    {
+        Move();
     }
 
     public void Move()

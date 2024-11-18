@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class DistanceTracker
+public class DistanceTracker 
 {
 	[SerializeField] public Transform myPosition;
 	[SerializeField] public Transform targetPosition;

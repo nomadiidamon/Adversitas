@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class MoveToDestination : IMove
+public class MoveToDestination : IMove, IMyAIComponent
 {
     private Transform objectTransform;
     private Vector3 destination;
@@ -13,6 +13,11 @@ public class MoveToDestination : IMove
         this.objectTransform = objectTransform;
         this.destination = destination;
         this.moveSpeed = moveSpeed;
+    }
+
+    public void PerformRole()
+    {
+        Move();
     }
 
     public void Move()
