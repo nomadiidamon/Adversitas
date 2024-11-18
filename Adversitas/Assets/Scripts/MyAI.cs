@@ -18,8 +18,8 @@ public class MyAI
 	{
 		this.target = target;
 		this.speed = speed;
-		this.health.stat.m_level.m_value = health;
-		this.stamina.stat.m_level.m_value = stamina;
+		this.health.m_level.m_value = health;
+		this.stamina.m_level.m_value = stamina;
 		this.damage = damage;
 	}
 }

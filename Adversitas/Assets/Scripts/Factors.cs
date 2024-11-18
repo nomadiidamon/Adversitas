@@ -87,37 +87,37 @@ public class NegativeStatus : INegativeStatusEffect
     //}
 }
 
-public class Resistances
-{
-    PositiveStatus m_positiveStatus;
-    NegativeStatus m_negativeStatus;
-    public Resistances(bool positive, int duration)
-    {
-        if (positive)
-        {
-            m_positiveStatus = new PositiveStatus(PositiveStatusType, duration);
-        }
-        else
-        {
-            m_negativeStatus = new NegativeStatus(NegativeStatusType, duration);
-        }
-    }
+//public class Resistances
+//{
+//    PositiveStatus m_positiveStatus;
+//    NegativeStatus m_negativeStatus;
+//    public Resistances(bool positive, int duration)
+//    {
+//        if (positive)
+//        {
+//            m_positiveStatus.status = PositiveStatusType.equilibrium
+//        }
+//        else
+//        {
+//            m_negativeStatus = new NegativeStatus(NegativeStatusType, duration);
+//        }
+//    }
 
-    public void ApplyResistance()
-    {
-        if (m_positiveStatus != null && m_positiveStatus.isActive)
-        {
-            m_positiveStatus.ApplyBuff();
-        }
+//    public void ApplyResistance()
+//    {
+//        if (m_positiveStatus != null && m_positiveStatus.isActive)
+//        {
+//            m_positiveStatus.ApplyBuff();
+//        }
 
-        if (m_negativeStatus != null && m_negativeStatus.isActive)
-        {
-            m_negativeStatus.ApplyDebuff();
-        }
+//        if (m_negativeStatus != null && m_negativeStatus.isActive)
+//        {
+//            m_negativeStatus.ApplyDebuff();
+//        }
 
-    }
+//    }
 
-}
+//}
 
 public class Factors
 {
