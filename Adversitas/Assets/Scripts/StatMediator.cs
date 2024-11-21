@@ -4,24 +4,20 @@ using System.Collections.Generic;
 public class StatMediator
 {
     private Stat stat;
-    private List<Resistances> resistances;
-    private List<Factors> factors;
 
     public StatMediator(Stat stat)
     {
         this.stat = stat;
-        this.resistances = new List<Resistances>();
-        this.factors = new List<Factors>();
     }
 
-    public void AddResistance(Resistances resistance)
+    public void AddResistance()
     {
-        resistances.Add(resistance);
+        
     }
 
-    public void AddFactor(Factors factor)
+    public void AddFactor()
     {
-        factors.Add(factor);
+        
     }
 
     public int CalculateStatValue()
@@ -43,16 +39,11 @@ public class StatMediator
 
     private void ApplyResistances()
     {
-        foreach (var resistance in resistances)
-        {
-            resistance.ApplyResistance();
-        }
+
     }
 
     private void ApplyFactors()
     {
-        foreach (var factor in factors)
-        {
-        }
+
     }
 }

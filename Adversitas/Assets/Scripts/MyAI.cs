@@ -11,6 +11,7 @@ public class MyAI
 	List<IMyAIComponent> components;
 	Stamina stamina;
 	Health health;
+	DamageValue damageValue;
 	public int damage { get; set;} 
 
 

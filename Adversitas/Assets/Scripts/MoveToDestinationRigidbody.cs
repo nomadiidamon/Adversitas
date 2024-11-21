@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public class MoveToDestinationRigidbody : IMove, IMyAIComponenet
+[RequireComponent (typeof(Rigidbody))]
+    public class MoveToDestinationRigidbody : IMove, IMyAIComponent
 {
     private Rigidbody objectRigidbody;
     private Vector3 destination;

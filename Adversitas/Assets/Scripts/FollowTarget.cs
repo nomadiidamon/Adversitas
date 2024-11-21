@@ -45,7 +45,6 @@ public class FollowTarget
             MoveFollower(moveDistance, direction);
         }
 
-        return distanceFromTarget;
     }
 
     public float GetDistanceFromTarget()
@@ -63,11 +62,6 @@ public class FollowTarget
     private void MoveFollower(float moveDistance, Vector3 direction)
     {
         myPosition.position += direction * moveDistance;
-    }
-
-    public float GetDistanceFromTarget()
-    {
-        return distanceFromTarget;
     }
 
     public void SetFollowDistance(float newDistance)
