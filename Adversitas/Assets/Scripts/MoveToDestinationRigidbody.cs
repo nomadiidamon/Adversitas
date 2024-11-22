@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 
 [RequireComponent (typeof(Rigidbody))]
-    public class MoveToDestinationRigidbody : IMove, IMyAIComponent
-{
-    private Rigidbody objectRigidbody;
+public class MoveToDestinationRigidbody : Monobehaviour, IMove, IMyAIComponent
+{   private Rigidbody objectRigidbody;
     private Vector3 destination;
     private float moveSpeed;
 

@@ -8,10 +8,13 @@ public class MyAI
 	public Transform target { get; set; }
 	public float speed { get; set; }
 	public Rigidbody rb;
-	List<IMyAIComponent> components;
-	Stamina stamina;
-	Health health;
-	DamageValue damageValue;
+	public Animator animator;
+	public List<AIStateBase> states;
+	public List<IMyAIComponent> components;
+	public Stamina stamina;
+	public Health health;
+	public Mana mana;
+	public DamageValue damageValue;
 	public int damage { get; set;} 
 
 
@@ -23,4 +26,15 @@ public class MyAI
 		this.stamina.m_level.m_value = stamina;
 		this.damage = damage;
 	}
+
+	public void AddState(AIStateBase stateToAdd)
+	{
+		states.Add(stateToAdd);
+	}
+
+	public void AddComponent(IMyAIComponent componentToAdd)
+	{
+		states.Add(componentToAdd);
+	}
+
 }
