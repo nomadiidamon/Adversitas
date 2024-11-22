@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[System.Serializable]
 public class Stamina : Stat
 {
     public int currentHealthPoints {get; set;}

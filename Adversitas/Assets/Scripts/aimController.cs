@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+[System.Serializable]
 public class aimController : MonoBehaviour
 {
 

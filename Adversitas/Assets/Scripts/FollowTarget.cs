@@ -1,7 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-public class FollowTarget
+[System.Serializable]
+[RequireComponent(typeof(MoveToDestinationRigidbody))]
+public class FollowTarget : IMyAIComponent
 {
     [SerializeField] public Transform myPosition;
     [SerializeField] public Transform followTargetsPosition;
@@ -26,6 +28,14 @@ public class FollowTarget
         }
 
         RecalculateDistance();
+    }
+
+    public void PerformRole()
+    {
+        if (iHaveATarget)
+        {
+            AdjustDistance();
+        }
     }
 
     public void RecalculateDistance()

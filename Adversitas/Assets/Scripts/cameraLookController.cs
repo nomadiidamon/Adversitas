@@ -2,7 +2,7 @@ using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
+[System.Serializable]
 public class cameraLookController : MonoBehaviour, ILook
 {
     [Header("-----Components-----")]

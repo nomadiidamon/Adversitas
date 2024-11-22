@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
 
 
-
+[System.Serializable]
 public class movementController : MonoBehaviour, IMove, IJump, IDodge
 {
     [Header("-----Components-----")]

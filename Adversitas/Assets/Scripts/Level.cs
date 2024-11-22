@@ -1,5 +1,6 @@
 ﻿using System;
 
+[System.Serializable]
 public class Level
 {
     public int m_value { get; set; }

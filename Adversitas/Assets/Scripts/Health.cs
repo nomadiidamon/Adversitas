@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[System.Serializable]
 public class Health : Stat
 {
     Factors factors;

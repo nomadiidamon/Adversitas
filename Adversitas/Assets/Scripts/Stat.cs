@@ -1,5 +1,6 @@
 ﻿using System;
 
+[System.Serializable]
 public class Stat
 {
 	public string m_name {  get; set; }
