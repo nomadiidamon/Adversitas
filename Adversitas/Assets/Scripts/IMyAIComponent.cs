@@ -1,9 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-public interface IMyAIComponent
+[SerializeField]
+public interface IAIComponent
 {
 	public void PerformRole();		     
-
-
 }

@@ -1,10 +1,11 @@
 ﻿using System;
+using UnityEngine;
 
 [System.Serializable]
 public class StatRequirement
 {
-	int minLevel;
-	bool meetsRequirment = false;
+    [SerializeField] int minLevel;
+    [SerializeField] bool meetsRequirment = false;
 
 	public StatRequirement(Stat stat, int minLevel)
 	{
@@ -12,7 +13,7 @@ public class StatRequirement
 
 		if (stat != null) { 
 
-			meetsRequirment = stat.m_level.m_value >= minLevel;
+			meetsRequirment = stat.m_value >= minLevel;
 		}
 	}
 }

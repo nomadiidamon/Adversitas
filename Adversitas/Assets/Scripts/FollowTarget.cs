@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Cinemachine;
 using UnityEngine;
 
+[SaveDuringPlay]
 [System.Serializable]
 [RequireComponent(typeof(MoveToDestinationRigidbody))]
-public class FollowTarget : IMyAIComponent
+public class FollowTarget : IAIComponent
 {
     [SerializeField] public Transform myPosition;
     [SerializeField] public Transform followTargetsPosition;

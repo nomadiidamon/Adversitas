@@ -1,12 +1,15 @@
 ﻿using System;
+using UnityEngine;
 
-public abstract class AIStateBase()
+[System.Serializable]
+[SerializeField]
+public class AIStateBase : ScriptableObject
 {
-    protected MyAI ai;
+    [SerializeField] protected AIBrain ai;
 
-    public AIStateBase(MyAI ai)
+    public AIStateBase(AIBrain _ai)
     {
-        this.ai = ai;
+        ai = _ai;
     }
 
     public virtual void Enter() { }

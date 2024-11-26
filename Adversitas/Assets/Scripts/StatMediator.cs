@@ -33,7 +33,7 @@ public class StatMediator
 
     private int CalculateBaseValue()
     {
-        int baseValue = 100 * stat.m_level.m_value;
+        int baseValue = 100 * stat.m_value;
         return baseValue;
     }
 

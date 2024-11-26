@@ -2,28 +2,29 @@
 using UnityEngine;
 
 [System.Serializable]
+[SerializeField]
 public class Health : Stat
 {
-    Factors factors;
-    public int currentHealthPoints { get; set; }
-    public int maxHealthPoints { get; set; }
+    [Header("Values")]
+    [SerializeField] public int currentHealthPoints;
+    [SerializeField] public int maxHealthPoints;
 
     public Health(string name, int level, int expToNextLvl, float levelRate)
         :base(name, level)
 	{
-        m_level.m_expToNextLevel = expToNextLvl;
-        m_level.m_levelRate = levelRate;
+        m_expToNextLevel = expToNextLvl;
+        m_levelRate = levelRate;
 
         CalculateInitialHealthPoints();        
     }
 
     private void CalculateInitialHealthPoints()
     {
-        if (m_level.m_value > 1)
+        if (m_value > 1)
         {
-            int target = 175 * m_level.m_value;
+            int target = 175 * m_value;
             currentHealthPoints = target;
-            maxHealthPoints = 300 * m_level.m_value;
+            maxHealthPoints = 300 * m_value;
         }
         else
         {

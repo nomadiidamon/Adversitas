@@ -1,8 +1,9 @@
 ﻿using System;
 
+[System.Serializable]
 public class IdleState : AIStateBase
 {
-    public IdleState(MyAI ai) : base(ai) { }
+    public IdleState(AIBrain ai) : base(ai) { }
 
     public override void Enter()
     {
@@ -14,7 +15,7 @@ public class IdleState : AIStateBase
 
     }
 
-    public virtual void FixedUpdate() 
+    public override void FixedUpdate() 
     { 
     
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public interface IStatusEffect
 {
@@ -16,15 +17,18 @@ public interface INegativeStatusEffect : IStatusEffect
     void ApplyDebuff();
 }
 
+[System.Serializable]
 public enum PositiveStatusType { equilibrium, other, FLowState, gainHealth, gainMana, gainStamina, breakOpponenet, executeOpponent, dodge };
+[System.Serializable]
 public enum NegativeStatusType { equilibrium, other, ToHeat, ToCold, Wet, Shocked, Burdened, Poisoned, Bleeding, stunned }
 
+[System.Serializable]
 public class PositiveStatus : IPositiveStatusEffect
 {
 
-    public PositiveStatusType status {  get; set; }
-    public bool isActive { get; set; }
-    public float effectDuration { get; set; }
+    [SerializeField] public PositiveStatusType status {  get; set; }
+    [SerializeField] public bool isActive { get; set; }
+    [SerializeField] public float effectDuration { get; set; }
     // my function pointer to give an effect to 
     //public StatusEffectDelegate StatusEffectFunction {  get; set; }
 
@@ -56,11 +60,12 @@ public class PositiveStatus : IPositiveStatusEffect
     // create funtion to assign our function pointer to something other than null
 }
 
+[System.Serializable]
 public class NegativeStatus : INegativeStatusEffect
 {
-    public NegativeStatusType status {  get; set; }
-    public bool isActive { get; set; }
-    public float effectDuration { get; set; }
+    [SerializeField] public NegativeStatusType status {  get; set; }
+    [SerializeField] public bool isActive { get; set; }
+    [SerializeField] public float effectDuration { get; set; }
 
     //public StatusEffectDelegate StatusEffectFunction { get; set; }
 
@@ -85,59 +90,5 @@ public class NegativeStatus : INegativeStatusEffect
     //{
     //    StatusEffectFunction = func;
     //}
-}
-
-//public class Resistances
-//{
-//    PositiveStatus m_positiveStatus;
-//    NegativeStatus m_negativeStatus;
-//    public Resistances(bool positive, int duration)
-//    {
-//        if (positive)
-//        {
-//            m_positiveStatus.status = PositiveStatusType.equilibrium
-//        }
-//        else
-//        {
-//            m_negativeStatus = new NegativeStatus(NegativeStatusType, duration);
-//        }
-//    }
-
-//    public void ApplyResistance()
-//    {
-//        if (m_positiveStatus != null && m_positiveStatus.isActive)
-//        {
-//            m_positiveStatus.ApplyBuff();
-//        }
-
-//        if (m_negativeStatus != null && m_negativeStatus.isActive)
-//        {
-//            m_negativeStatus.ApplyDebuff();
-//        }
-
-//    }
-
-//}
-
-public class Factors
-{
-    //List<Resistances> m_resistances;
-
-    //Factors(int Positve, int Negative)
-    //{
-    //    for (int i = 0; i < (Positve); i++)
-    //    {
-    //        m_resistances.push_back(new Resistances(true, 1));
-    //    }
-    //    for (int i = 0; i < (Negative); i++)
-    //    {
-    //        m_resistances.push_back(new Resistances(true, 0));
-    //    }
-
-   // }
-
-    //method to remove all factors after equilibrium is hit. always keep (5)
-
-
 }
 

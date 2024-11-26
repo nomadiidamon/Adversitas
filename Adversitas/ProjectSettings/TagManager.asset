@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - Boss
   - UI
+  - CinemachineTarget
+  - Waypoint
   layers:
   - Default
   - TransparentFX

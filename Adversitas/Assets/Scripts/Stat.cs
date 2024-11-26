@@ -1,20 +1,24 @@
 ﻿using System;
+using UnityEngine;
 
 [System.Serializable]
-public class Stat
+[SerializeField]
+public class Stat : Level
 {
-	public string m_name {  get; set; }
-	public Level m_level { get; set; }
+    [Header("Name")]
+    [SerializeField] public string m_name;
 
-    public int firstLimitValue { get; set; }
-    public int secondLimitValue { get; set; }
-    public float firstLimitRate { get; set; }
-    public float secondLimitRate { get; set; }
+    [Header("Progression Limiters")]
+    [SerializeField] public int firstLimitValue;
+    [SerializeField] public float firstLimitRate;
+    [SerializeField] public int secondLimitValue;
+    [SerializeField] public float secondLimitRate;  
 
+    [SerializeField]
     public Stat(string name, int level)
+        :base(level)
 	{
         m_name = name;
-        m_level.m_value = level;
 	}
 
 

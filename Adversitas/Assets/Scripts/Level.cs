@@ -1,12 +1,17 @@
 ﻿using System;
+using UnityEngine;
 
 [System.Serializable]
-public class Level
+[SerializeField]
+public class Level : MonoBehaviour
 {
-    public int m_value { get; set; }
-    public int m_currExperience { get; set; }
-    public int m_expToNextLevel { get; set; }
-    public float m_levelRate {  get; set; }
+    [Header("Level")]
+    [SerializeField] public int m_value;
+
+    [Header("Experience / Progression")]
+    [SerializeField] public int m_currExperience;
+    [SerializeField] public int m_expToNextLevel;
+    [SerializeField] public float m_levelRate;
 
 
     public Level(int value, int currExperience = 0, int expToNextLevel = 100, float levelRate = 1.0f)

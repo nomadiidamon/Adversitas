@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Cinemachine;
 using UnityEngine;
 
-public class MoveToDestination : IMove, IMyAIComponent
+[SaveDuringPlay]
+[System.Serializable]
+public class MoveToDestination : IMove, IAIComponent
 {
     private Transform objectTransform;
     private Vector3 destination;
