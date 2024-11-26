@@ -3,7 +3,7 @@ using UnityEngine;
 
 [System.Serializable]
 [SerializeField]
-public class AIStateBase : ScriptableObject
+public class AIStateBase : MonoBehaviour
 {
     [SerializeField] protected AIBrain ai;
 

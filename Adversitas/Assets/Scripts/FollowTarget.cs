@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(MoveToDestinationRigidbody))]
 public class FollowTarget : IAIComponent
 {
+    public string Name { get; set; }
     [SerializeField] public Transform myPosition;
     [SerializeField] public Transform followTargetsPosition;
     private float followDistance;

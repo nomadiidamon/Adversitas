@@ -8,7 +8,7 @@ public class MoveToDestination : IMove, IAIComponent
     private Transform objectTransform;
     private Vector3 destination;
     private float moveSpeed;
-
+    public string Name { get; set; }
 
     public MoveToDestination(Transform objectTransform, Vector3 destination, float moveSpeed)
     {

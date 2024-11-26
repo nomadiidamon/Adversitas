@@ -4,23 +4,44 @@ using UnityEngine;
 
 [SaveDuringPlay]
 [System.Serializable]
-[RequireComponent (typeof(Rigidbody))]
-public class MoveToDestinationRigidbody : MonoBehaviour, IMove, IAIComponent
-{   private Rigidbody objectRigidbody;
-    [SerializeField] private Transform destinationTransform;
-    [SerializeField] private Vector3 destinationVector3;
-    [SerializeField] private float moveSpeed;
+public class MoveToDestinationRigidbody : AIComponent, IMove, IAIComponent
+{   
+    private Rigidbody objectRigidbody;
+    [SerializeField] public Transform destinationTransform;
+    [SerializeField] public Vector3 destinationVector3;
+    [SerializeField] public float moveSpeed;
+    [SerializeField] public float stoppingDistance;
+    [SerializeField] public bool isAtDestination = false;
 
-    public MoveToDestinationRigidbody(Rigidbody objectRigidbody, Transform destination, float moveSpeed)
+    //public MoveToDestinationRigidbody(Rigidbody objectRigidbody, Transform destination, float moveSpeed)
+    //{
+    //    this.objectRigidbody = objectRigidbody;
+    //    this.destinationTransform = destination;
+    //    this.destinationVector3 = destinationTransform.position;
+    //    this.moveSpeed = moveSpeed;
+    //}
+
+    public void Start()
     {
-        this.objectRigidbody = objectRigidbody;
-        this.destinationTransform = destination;
-        this.destinationVector3 = destinationTransform.position;
-        this.moveSpeed = moveSpeed;
+        if (destinationTransform != null)
+        {
+            SetDestination(destinationTransform);
+            destinationVector3 = destinationTransform.localPosition;
+            objectRigidbody = GetComponentInParent<Rigidbody>();
+        }
     }
 
-    public void PerformRole()
+    public void FixedUpdate()
     {
+        PerformRole();
+    }
+
+    public override void PerformRole()
+    {
+        if (isAtDestination)
+        {
+            return;
+        }
         Move();
     }
 
@@ -28,8 +49,18 @@ public class MoveToDestinationRigidbody : MonoBehaviour, IMove, IAIComponent
     {
         if (objectRigidbody == null) return;
 
-        Vector3 direction = (destinationVector3 - objectRigidbody.position).normalized;
+        if ((destinationVector3 - objectRigidbody.position).magnitude < stoppingDistance)
+        {
+            isAtDestination = true;
+            return;
+        }
 
+
+
+        Vector3 direction = (destinationVector3 - objectRigidbody.position).normalized;
+        direction.y = 0;
+        //Debug.Log("Direction: " + direction);
+        objectRigidbody.transform.rotation.SetLookRotation(direction);
         objectRigidbody.MovePosition(objectRigidbody.position + direction * moveSpeed * Time.deltaTime);
     }
 
@@ -37,40 +68,48 @@ public class MoveToDestinationRigidbody : MonoBehaviour, IMove, IAIComponent
     {
         moveSpeed = newSpeed;
 
-        Debug.Log("Speed changed to: " + moveSpeed);
+        //Debug.Log("Speed changed to: " + moveSpeed);
     }
 
     public float GetMoveSpeed()
     {
-        Debug.Log("Speed is: " + moveSpeed);
+        //.Log("Speed is: " + moveSpeed);
         return moveSpeed;
     }
 
     public void SetDestination(Vector3 newDestination)
     {
-        destinationVector3 = newDestination;
+        if (newDestination != destinationVector3)
+        {
+            isAtDestination = false;
+            destinationVector3 = newDestination;
+            //Debug.Log("Destination changed to: " + destinationVector3);
 
-        Debug.Log("Destination changed to: " + destinationVector3);
+        }
     }
 
     public void SetDestination(Transform newDestination)
     {
+        destinationTransform = newDestination;
         SetDestination(newDestination.position);
     }
 
 
     public Vector3 GetDestinationVector3()
     {
-        Debug.Log("Destination is: " + destinationVector3);
+        //Debug.Log("Destination is: " + destinationVector3);
         return GetDestinationTransform().position;
     }
 
     public Transform GetDestinationTransform()
     {
-        Debug.Log("Destination is: " + destinationTransform);
+        //Debug.Log("Destination is: " + destinationTransform);
         return destinationTransform;
     }
 
-
+    private void OnValidate()
+    {
+        SetDestination(GetDestinationTransform());
+    }
 
 }
