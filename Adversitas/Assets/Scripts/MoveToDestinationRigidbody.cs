@@ -9,8 +9,8 @@ public class MoveToDestinationRigidbody : AIComponent, IMove, IAIComponent
     private Rigidbody objectRigidbody;
     [SerializeField] public Transform destinationTransform;
     [SerializeField] public Vector3 destinationVector3;
-    [SerializeField] public float moveSpeed;
-    [SerializeField] public float stoppingDistance;
+    [Range(0, 290)][SerializeField] public float moveSpeed;
+    [Range(2.9f, 50)][SerializeField] public float stoppingDistance;
     [SerializeField] public bool isAtDestination = false;
 
     //public MoveToDestinationRigidbody(Rigidbody objectRigidbody, Transform destination, float moveSpeed)
@@ -105,6 +105,11 @@ public class MoveToDestinationRigidbody : AIComponent, IMove, IAIComponent
     {
         //Debug.Log("Destination is: " + destinationTransform);
         return destinationTransform;
+    }
+
+    public void SetStoppingDistance(float newStoppingDistance)
+    {
+        stoppingDistance = newStoppingDistance;
     }
 
     private void OnValidate()

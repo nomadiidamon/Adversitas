@@ -10,15 +10,18 @@ public class AIPatrol : AIComponent, IPatrol, IAIComponent
     [SerializeField] public List<Waypoint> waypoints = new List<Waypoint>();
     [SerializeField] private Waypoint currentWaypoint;
     [SerializeField] private int index = 0;
-    [Range(0,5)][SerializeField] private float waitTime = 0.0f;
-    [SerializeField] float stoppingDistance;
+    [Range(0,20)][SerializeField] private float waitTime = 0.0f;
+    [Range(2.9f, 50)][SerializeField] float stoppingDistance;
     [SerializeField] MoveToDestinationRigidbody mover;
+    [SerializeField] Timer patrolTimer;
 
     void Start()
     {
         mover = GetComponentInParent<MoveToDestinationRigidbody>();
         stoppingDistance = mover.stoppingDistance;
         atLocation = mover.isAtDestination;
+        patrolTimer.SetTargetTime(waitTime);
+        mover.SetStoppingDistance(stoppingDistance);
         Register();
     }
 
@@ -57,15 +60,28 @@ public class AIPatrol : AIComponent, IPatrol, IAIComponent
                 if ((currentWaypoint.transform.position - transform.position).magnitude < stoppingDistance)
                 {
                     Debug.Log("Arrived at Destination");
+                    patrolTimer.stopwatch.Start();
 
-                    index++;
-                    if (index == waypoints.Count - 1)
+                    if (patrolTimer.isDone)
                     {
-                        index %= waypoints.Count;
+                        Debug.Log("Patrol Timer finished");
+                        patrolTimer.SetTargetTime(waitTime);
+                        index++;
+                        if (index >= waypoints.Count)
+                        {
+                            index = 0;
+                        }
+                        currentWaypoint = waypoints[index];
+                        mover.SetDestination(currentWaypoint.transform.position);
+                        isPatrolling = false;
+                        patrolTimer.ResetTimer();
                     }
-                    currentWaypoint = waypoints[index];
-                    mover.SetDestination(currentWaypoint.transform.position);
-                    isPatrolling = false;
+                    else
+                    {
+                        //
+                        mover.SetDestination(transform.position);
+                    }
+
                 }
 
             }
