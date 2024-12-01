@@ -4811,7 +4811,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destinationTransform: {fileID: 1237989981}
-  destinationVector3: {x: -1.979153, y: 0.1771478, z: -18.33693}
+  destinationVector3: {x: 20.75, y: 1, z: 17}
   moveSpeed: 290
   stoppingDistance: 2.9
   isAtDestination: 0
