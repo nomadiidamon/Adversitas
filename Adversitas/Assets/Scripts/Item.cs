@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum ItemType {BASIC_ITEM, KEY_ITEM, MATERIAL_ITEM, EQUIPMENT_ITEM, CONSUMABLE_ITEM}
 
-public class Item
+public class Item : ScriptableObject
 {
 	private string m_name {  get; set; }
 	ItemType m_type { get; set; }
