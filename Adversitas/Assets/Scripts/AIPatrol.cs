@@ -110,17 +110,4 @@ public class AIPatrol : AIComponent, IPatrol, IAIComponent
 
     }
 
-    //public IEnumerator PauseAtLocation(float pauseTime)
-    //{
-    //    isPatrolling = false;
-    //    yield return new WaitForSeconds(pauseTime);
-    //    if (index >= waypoints.Count)
-    //    {
-    //        index -= index;
-    //    }
-    //    else
-    //    {
-    //        index++;
-    //    }
-    //}
 }

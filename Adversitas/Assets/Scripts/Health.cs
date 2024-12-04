@@ -18,7 +18,7 @@ public class Health : Stat
         CalculateInitialHealthPoints();        
     }
 
-    private void CalculateInitialHealthPoints()
+    public void CalculateInitialHealthPoints()
     {
         if (m_value > 1)
         {

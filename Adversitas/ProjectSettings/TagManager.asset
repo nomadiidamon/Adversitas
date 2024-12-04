@@ -11,6 +11,8 @@ TagManager:
   - UI
   - CinemachineTarget
   - Waypoint
+  - Test
+  - NPC
   layers:
   - Default
   - TransparentFX
