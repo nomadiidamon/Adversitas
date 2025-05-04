@@ -10,8 +10,8 @@ public class Grid
 
 	public Grid(int _width, int _height, float _cellSize)
 	{
-		this.width = _width;
-		this.height = _height;
+		width = _width;
+		height = _height;
 		gridArray = new int[width, height];
 
 		for (int x = 0; x < gridArray.GetLength(0); x++) {

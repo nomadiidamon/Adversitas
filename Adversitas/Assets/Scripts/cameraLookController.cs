@@ -8,7 +8,7 @@ public class cameraLookController : MonoBehaviour, ILook
     [Header("-----Components-----")]
     [SerializeField] PlayerInput playerInput;
     [SerializeField] public Camera playerCamera;
-    [SerializeField] public CinemachineVirtualCamera lookCamera;
+    [SerializeField] public CinemachineFreeLook lookCamera;
     [SerializeField] public Transform centerOfMass;
     [SerializeField] public Transform bodyRotatePoint;
 
